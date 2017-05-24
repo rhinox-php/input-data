@@ -1,0 +1,8 @@
+{
+    "name": "rhinox/input-data",
+    "autoload": {
+        "files": [
+            "InputData.php"
+        ]
+    }
+}
