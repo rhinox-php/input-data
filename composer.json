@@ -1,8 +1,11 @@
 {
     "name": "rhinox/input-data",
     "autoload": {
-        "files": [
-            "InputData.php"
-        ]
+        "psr-4": {
+            "Rhino\\InputData\\": "classes/"
+        }
+    },
+    "require": {
+        "phpunit/phpunit": "^9.3"
     }
 }
