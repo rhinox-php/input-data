@@ -51,4 +51,48 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $inputData = new InputData((object) []);
         $this->assertSame('default', $inputData->int(null, 'default'));
     }
+
+    public function testDecimal(): void
+    {
+        $inputData = new InputData([
+            'str' => 'foo',
+            'dec' => 7.1,
+        ]);
+        $this->assertSame(0, $inputData->decimal('str'));
+        $this->assertSame(7.1, $inputData->decimal('dec'));
+        $this->assertSame(5, $inputData->decimal('str', 5));
+
+        $inputData = new InputData(8.3);
+        $this->assertSame(8.3, $inputData->decimal());
+
+        $inputData = new InputData('9.4');
+        $this->assertSame(9.4, $inputData->decimal());
+
+        $inputData = new InputData([]);
+        $this->assertSame('default', $inputData->decimal(null, 'default'));
+
+        $inputData = new InputData((object) []);
+        $this->assertSame('default', $inputData->decimal(null, 'default'));
+    }
+
+    public function testBool(): void
+    {
+        $inputData = new InputData([
+            'str' => 'foo',
+            't' => true,
+            'f' => false,
+        ]);
+        $this->assertSame(true, $inputData->bool('str'));
+        $this->assertSame(true, $inputData->bool('t'));
+        $this->assertSame(false, $inputData->bool('f'));
+
+        $inputData = new InputData(true);
+        $this->assertSame(true, $inputData->bool());
+
+        $inputData = new InputData('');
+        $this->assertSame(false, $inputData->bool());
+
+        $inputData = new InputData('0');
+        $this->assertSame(false, $inputData->bool());
+    }
 }
