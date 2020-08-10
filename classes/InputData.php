@@ -230,18 +230,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         ];
     }
 
-    /**
-     * @return \Rhino\InputData\InputData
-     */
-    public function extract($data)
-    {
-        $newData = [];
-        foreach ($data as $key => $type) {
-            $newData[$key] = $this->$type($key);
-        }
-        return new static($newData);
-    }
-
     private function isCastable($value)
     {
         if (is_scalar($value)) {
@@ -277,7 +265,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->_data;
     }
 
-    public static function getValue($data, $name, $default)
+    private static function getValue($data, $name, $default)
     {
         if (!$name) {
             return $data;
@@ -389,28 +377,10 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     public static function jsonDecode(string $jsonString, bool $assoc = true): self
     {
         $json = json_decode($jsonString, $assoc);
-        $error = json_last_error();
-        $message = json_last_error_msg();
-        if ($error) {
-            $errorMessage = 'Unknown error';
-            switch ($error) {
-                case JSON_ERROR_DEPTH:
-                    $errorMessage = 'Maximum stack depth exceeded';
-                    break;
-                case JSON_ERROR_STATE_MISMATCH:
-                    $errorMessage = 'Underflow or the modes mismatch';
-                    break;
-                case JSON_ERROR_CTRL_CHAR:
-                    $errorMessage = 'Unexpected control character found';
-                    break;
-                case JSON_ERROR_SYNTAX:
-                    $errorMessage = 'Syntax error, malformed JSON';
-                    break;
-                case JSON_ERROR_UTF8:
-                    $errorMessage = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-                    break;
-            }
-            throw new \Exception('Error decoding JSON #' . $error . ' ' . $errorMessage . ' ' . $message);
+        $errorCode = json_last_error();
+        if ($errorCode) {
+            $message = json_last_error_msg();
+            throw new ParseException('Error decoding JSON #' . $errorCode . ' ' . $message);
         }
         return new static($json);
     }

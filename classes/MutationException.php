@@ -2,6 +2,6 @@
 
 namespace Rhino\InputData;
 
-class MutationException extends \Exception
+class MutationException extends InputDataException
 {
 }

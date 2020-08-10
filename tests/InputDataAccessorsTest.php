@@ -156,4 +156,13 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         // @todo test invalid data
         // $this->markTestIncomplete();
     }
+
+    public function testRaw(): void
+    {
+        $inputData = new InputData(['abc' => 123]);
+        $this->assertSame(123, $inputData->raw('abc'));
+
+        $inputData = new InputData(fopen(__FILE__, 'r'));
+        $this->assertSame(123, $inputData->raw('def', 123));
+    }
 }

@@ -3,6 +3,7 @@
 namespace Rhino\InputData\Tests;
 
 use Rhino\InputData\InputData;
+use Rhino\InputData\ParseException;
 
 class InputDataTest extends \PHPUnit\Framework\TestCase
 {
@@ -49,6 +50,15 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('"foo"', json_encode(new InputData('foo')));
     }
 
+    public function testJsonDecode(): void
+    {
+        $inputData = InputData::jsonDecode('{"a":1,"b":2,"c":3}');
+        $this->assertSame('1', $inputData->string('a'));
+
+        $this->expectException(ParseException::class);
+        InputData::jsonDecode('{"a":1,"b":2,"c":3');
+    }
+
     public function testToString(): void
     {
         $this->assertSame('foo', (string) new InputData('foo'));
@@ -72,5 +82,12 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
     public function testArray(): void
     {
         $this->assertTrue((new InputData([]))->isArray());
+    }
+
+    public function testExists(): void
+    {
+        $this->assertTrue((new InputData(['a' => 1]))->exists('a'));
+        $this->assertTrue((new InputData((object) ['a' => 1]))->exists('a'));
+        $this->assertFalse((new InputData(null))->exists('b'));
     }
 }
