@@ -12,13 +12,16 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     /**
      * @var mixed[]
      */
-    private $_data;
+    protected $_data;
 
     /**
-     * @param mixed[]|mixed|null $_data Input data
+     * @param mixed[]|null|string|float|int $_data Input data
      */
     public function __construct($_data)
     {
+        if ($_data instanceof static) {
+            $_data = $_data->_data;
+        }
         $this->_data = $_data;
     }
 
@@ -30,22 +33,14 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return bool
      */
-    public function bool($name = null, $default = false)
+    public function bool(?string $name = null, ?bool $default = false): ?bool
     {
-        if (!$name) {
-            if (is_array($this->_data)) {
-                return $default;
-            }
-            return (bool) $this->_data;
-        }
-
         [$data, $name] = $this->extractDataKey($name, $this->_data);
-
         $result = $this->getValue($data, $name, $default);
-        if (is_scalar($result)) {
-            return (bool) $result;
+        if (!$this->isCastable($result)) {
+            return $default;
         }
-        return $default;
+        return (bool) $result;
     }
 
     /**
@@ -56,22 +51,14 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return int
      */
-    public function int($name = null, $default = 0)
+    public function int(?string $name = null, ?int $default = 0): ?int
     {
-        if (!$name) {
-            if (is_array($this->_data)) {
-                return $default;
-            }
-            return (int) $this->_data;
-        }
-
         [$data, $name] = $this->extractDataKey($name, $this->_data);
-
         $result = $this->getValue($data, $name, $default);
-        if (is_numeric($result)) {
-            return (int) $result;
+        if (!$this->isCastable($result) || !is_numeric($result)) {
+            return $default;
         }
-        return $default;
+        return (int) $result;
     }
 
     /**
@@ -82,23 +69,17 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return float
      */
-    public function decimal($name = null, $default = 0)
+    public function decimal(?string $name = null, ?float $default = 0): ?float
     {
-        if (!$name) {
-            if (is_array($this->_data)) {
-                return $default;
-            }
-            return (float) $this->_data;
-        }
-
         [$data, $name] = $this->extractDataKey($name, $this->_data);
-
         $result = $this->getValue($data, $name, $default);
-        if (is_numeric($result)) {
-            return (float) $result;
+        if (!$this->isCastable($result) || !is_numeric($result)) {
+            return $default;
         }
-        return $default;
+        return (float) $result;
     }
+
+    // @todo support big number types
 
     /**
      * Cast to an string.
@@ -108,46 +89,78 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return string
      */
-    public function string($name = null, $default = '')
+    public function string(?string $name = null, ?string $default = ''): ?string
     {
-        if (!$name) {
-            if (is_array($this->_data)) {
-                return $default;
-            }
-            return (string) $this->_data;
-        }
-
         [$data, $name] = $this->extractDataKey($name, $this->_data);
-
         $result = $this->getValue($data, $name, $default);
-
-        if (is_scalar($result)) {
-            return (string) $result;
+        if (!$this->isCastable($result)) {
+            return $default;
         }
-        return $default;
+        return (string) $result;
     }
 
+    public function html(?string $name = null, ?string $default = ''): ?string
+    {
+        // @todo
+        $value = $this->string($name, $default);
+        if ($value === $default) {
+            return $default;
+        }
+        return cleanHtml($value);
+    }
+
+    public function uuid(?string $name = null, $default = null): ?string
+    {
+        // @todo
+        $string = $this->string($name, $default);
+        if ($string === $default || !$string || !uuidValid($string)) {
+            return $default;
+        }
+        return uuidBytes($string);
+    }
+
+    public function uuidString(?string $name = null, $default = null): ?string
+    {
+        // @todo
+        $string = $this->string($name, $default);
+        if ($string === $default || !$string || !uuidValid($string)) {
+            return $default;
+        }
+        return $string;
+    }
+
+    public function token(?string $name = null, $default = null): ?InputData
+    {
+        // @todo allow extending for things like this
+        $string = $this->string($name, $default);
+        if ($string === $default || !$string) {
+            return $default;
+        }
+        return Token::decode($string);
+    }
     /**
      * Parse a DateTime.
      *
      * @param string $name     The name/key of input item
-     * @param string $timezone The timezone to use for the result, if null the default or input is used
-     * @param string $default  The default value if the item doesn't exist or is invalid
+     * @param string $timezone The timezone identifier to use for the result, if null the default or input is used
+     * @param string $default  The default date/time string to use if the item doesn't exist or is invalid
      *
      * @return \DateTimeImmutable
      */
-    public function dateTime($name, $timezone = null, $default = 'now')
+    public function dateTime(?string $name, ?string $timezone = null, ?string $default = null): ?\DateTimeImmutable
     {
         [$data, $name] = $this->extractDataKey($name, $this->_data);
+        $value = $this->getValue($data, $name, $default);
 
-        if ($default === null && !$this->getValue($data, $name, $default)) {
+        if ($default === null && !$value) {
             return null;
         }
+
         try {
             if ($timezone) {
-                return new \DateTimeImmutable($this->getValue($data, $name, $default) ?: $default, new \DateTimezone($timezone));
+                return new \DateTimeImmutable($value ?: $default, new \DateTimezone($timezone));
             } else {
-                return new \DateTimeImmutable($this->getValue($data, $name, $default) ?: $default);
+                return new \DateTimeImmutable($value ?: $default);
             }
         } catch (\Exception $exception) {
             if ($timezone) {
@@ -166,13 +179,16 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return \Rhino\InputData\InputData
      */
-    public function arr($name = null, array $default = [])
+    public function arr(?string $name = null, array $default = [])
     {
         if (!$name) {
-            if (!is_array($this->_data)) {
-                return new static($default);
+            if (is_object($this->_data)) {
+                return new static((array) $this->_data);
             }
-            return new static($this->_data);
+            if (is_array($this->_data)) {
+                return new static($this->_data);
+            }
+            return new static($default);
         }
         [$data, $name] = $this->extractDataKey($name, $this->_data);
 
@@ -187,7 +203,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return \Rhino\InputData\InputData
      */
-    public function json($name = null, $default = [])
+    public function json(?string $name = null, $default = [])
     {
         $value = $this->string($name);
         if (!$value) {
@@ -271,17 +287,15 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return new static($newData);
     }
 
-    /**
-     * @return \Rhino\InputData\InputData
-     */
-    public function extend(array $data)
+    private function isCastable($value)
     {
-        $newData = [];
-        foreach ($this->_data as $key => $type) {
-            $newData[$key] = $this->_data[$key];
+        if (is_scalar($value)) {
+            return true;
         }
-        $newData = array_replace_recursive($newData, $data);
-        return new static($newData);
+        if (is_object($value) && method_exists($value, '__toString')) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -295,44 +309,24 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     /**
      * @return bool True if the input data is an array
      */
-    public function isArray()
+    public function isArray(): bool
     {
         return is_array($this->_data);
     }
 
     /**
-     * @return mixed[]
+     * @return mixed[]|null|string|float|int
      */
     public function getData()
     {
-        if (is_scalar($this->_data) || $this->_data === null) {
-            return $this->_data;
-        }
-        array_walk_recursive($this->_data, function (&$value) {
-            if ($value instanceof static) {
-                $value = $value->_data;
-            }
-        });
         return $this->_data;
     }
 
-    /**
-     * @return \Rhino\InputData\InputData
-     */
-    public function map($callback)
-    {
-        $result = [];
-        foreach ($this as $key => $value) {
-            $result[$key->_data] = $callback($value);
-        }
-        return new static($result);
-    }
-
-    /**
-     * @return mixed
-     */
     public static function getValue($data, $name, $default)
     {
+        if (!$name) {
+            return $data;
+        }
         if (is_array($data)) {
             if (!array_key_exists($name, $data)) {
                 return $default;
@@ -348,10 +342,20 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $default;
     }
 
-    /**
-     * @return \Rhino\InputData\InputData
-     */
-    public function __get($name)
+    public function exists($name)
+    {
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
+
+        if (is_array($data)) {
+            return array_key_exists($name, $data);
+        }
+        if (is_object($data)) {
+            return property_exists($data, $name);
+        }
+        return false;
+    }
+
+    public function __get(string $name): InputData
     {
         if (is_array($this->_data)) {
             return isset($this->_data[$name]) ? new static($this->_data[$name]) : new static(null);
@@ -359,19 +363,12 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return isset($this->_data->$name) ? new static($this->_data->$name) : new static(null);
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, $value)
     {
-        if ($value instanceof static) {
-            $value = $value->_data;
-        }
-        if (is_array($this->_data)) {
-            $this->_data[$name] = $value;
-        } elseif (is_object($this->_data)) {
-            $this->_data->$name = $value;
-        }
+        throw new MutationException('Cannot set property of non mutable input data');
     }
 
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         if (is_array($this->_data)) {
             return isset($this->_data[$name]);
@@ -379,12 +376,17 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return isset($this->_data->$name);
     }
 
-    public function __toString()
+    public function __unset(string $name)
+    {
+        throw new MutationException('Cannot unset property of non mutable input data');
+    }
+
+    public function __toString(): string
     {
         return $this->string();
     }
 
-    public function getIterator()
+    public function getIterator(): \Generator
     {
         if (is_array($this->_data) || is_object($this->_data)) {
             foreach ($this->_data as $key => $value) {
@@ -393,7 +395,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         }
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $this->__isset($offset);
     }
@@ -405,28 +407,23 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
 
     public function offsetSet($offset, $value)
     {
-        $this->$offset = $value;
+        throw new MutationException('Cannot set offset of non mutable input data');
     }
 
     public function offsetUnset($offset)
     {
-        $this->unset($offset);
+        throw new MutationException('Cannot unset offset of non mutable input data');
     }
 
-    public function unset($name): InputData
+    public function count(): int
     {
-        if (is_object($this->_data)) {
-            unset($this->_data->$name);
+        if (!$this->_data) {
+            return 0;
         }
-        if (is_array($this->_data)) {
-            unset($this->_data[$name]);
+        if (is_array($this->_data) || $this->_data instanceof \Countable) {
+            return count($this->_data);
         }
-        return $this;
-    }
-
-    public function count()
-    {
-        return count($this->_data);
+        return 0;
     }
 
     public function jsonSerialize()
@@ -438,6 +435,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     {
         $json = json_decode($jsonString, $assoc);
         $error = json_last_error();
+        $message = json_last_error_msg();
         if ($error) {
             $errorMessage = 'Unknown error';
             switch ($error) {
@@ -457,7 +455,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
                     $errorMessage = 'Malformed UTF-8 characters, possibly incorrectly encoded';
                     break;
             }
-            throw new \Exception('Error decoding JSON #' . $error . ' ' . $errorMessage);
+            throw new \Exception('Error decoding JSON #' . $error . ' ' . $errorMessage . ' ' . $message);
         }
         return new static($json);
     }

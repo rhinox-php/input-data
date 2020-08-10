@@ -39,17 +39,15 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(7, $inputData->int('int'));
         $this->assertSame(5, $inputData->int('str', 5));
 
-        $inputData = new InputData(8);
-        $this->assertSame(8, $inputData->int());
+        $this->assertSame(8, (new InputData(8))->int());
+        $this->assertSame(8, (new InputData('8.1'))->int());
+        $this->assertSame(9, (new InputData(9))->int(null, null));
+        $this->assertSame(2, (new InputData([]))->int(null, 2));
+        $this->assertSame(3, (new InputData(null))->int(null, 3));
+        $this->assertSame(null, (new InputData([]))->int(null, null));
+        $this->assertSame(null, (new InputData((object) []))->int(null, null));
 
-        $inputData = new InputData('8.1');
-        $this->assertSame(8, $inputData->int());
-
-        $inputData = new InputData([]);
-        $this->assertSame('default', $inputData->int(null, 'default'));
-
-        $inputData = new InputData((object) []);
-        $this->assertSame('default', $inputData->int(null, 'default'));
+        // @todo test big ints
     }
 
     public function testDecimal(): void
@@ -58,21 +56,19 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
             'str' => 'foo',
             'dec' => 7.1,
         ]);
-        $this->assertSame(0, $inputData->decimal('str'));
+        $this->assertSame((float) 0, $inputData->decimal('str'));
         $this->assertSame(7.1, $inputData->decimal('dec'));
-        $this->assertSame(5, $inputData->decimal('str', 5));
+        $this->assertSame(5.1, $inputData->decimal('str', 5.1));
 
-        $inputData = new InputData(8.3);
-        $this->assertSame(8.3, $inputData->decimal());
+        $this->assertSame(8.3, (new InputData(8.3))->decimal());
+        $this->assertSame(9.4, (new InputData('9.4'))->decimal());
+        $this->assertSame(10.2, (new InputData(10.2))->decimal(null, 9.5));
+        $this->assertSame(1.2, (new InputData([]))->decimal(null, 1.2));
+        $this->assertSame(1.3, (new InputData(null))->decimal(null, 1.3));
+        $this->assertSame(null, (new InputData([]))->decimal(null, null));
+        $this->assertSame(2.3, (new InputData((object) []))->decimal(null, 2.3));
 
-        $inputData = new InputData('9.4');
-        $this->assertSame(9.4, $inputData->decimal());
-
-        $inputData = new InputData([]);
-        $this->assertSame('default', $inputData->decimal(null, 'default'));
-
-        $inputData = new InputData((object) []);
-        $this->assertSame('default', $inputData->decimal(null, 'default'));
+        // @todo test high precision floats
     }
 
     public function testBool(): void
@@ -86,13 +82,102 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(true, $inputData->bool('t'));
         $this->assertSame(false, $inputData->bool('f'));
 
-        $inputData = new InputData(true);
-        $this->assertSame(true, $inputData->bool());
+        $this->assertSame(true, (new InputData(true))->bool());
+        $this->assertSame(false, (new InputData(''))->bool());
+        $this->assertSame(false, (new InputData('0'))->bool());
+        $this->assertSame(true, (new InputData(true))->bool(null, null));
+        $this->assertSame(true, (new InputData([]))->bool(null, true));
+        $this->assertSame(false, (new InputData([]))->bool(null, false));
+        $this->assertSame(null, (new InputData([]))->bool(null, null));
+        $this->assertSame(true, (new InputData((object) []))->bool(null, true));
+    }
 
-        $inputData = new InputData('');
-        $this->assertSame(false, $inputData->bool());
+    public function testDateTime(): void
+    {
+        $inputData = new InputData([
+            'd1' => '2019-07-24',
+            'd2' => null,
+            'd3' => 'invalid date',
+        ]);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $inputData->dateTime('d1'));
+        $this->assertSame('2019-07-24', $inputData->dateTime('d1')->format('Y-m-d'));
+        $this->assertSame('2019-07-24T00:00:00+0000', $inputData->dateTime('d1', 'UTC')->format(DATE_ISO8601));
+        $this->assertSame('2019-07-24T00:00:00+1200', $inputData->dateTime('d1', 'Pacific/Auckland')->format(DATE_ISO8601));
+        $this->assertSame(null, $inputData->dateTime('d2', null, null));
+        $this->assertSame(null, $inputData->dateTime('d2', 'Pacific/Auckland', null));
+        $this->assertSame('2019-08-25', $inputData->dateTime('d3', null, '2019-08-25')->format('Y-m-d'));
+        $this->assertSame('2019-08-25T00:00:00+1200', $inputData->dateTime('d3', 'Pacific/Auckland', '2019-08-25')->format(DATE_ISO8601));
+        // @todo test timestamps
+    }
 
-        $inputData = new InputData('0');
-        $this->assertSame(false, $inputData->bool());
+    public function testArr(): void
+    {
+        $inputData = new InputData([
+            'a1' => [1, 2, 3],
+        ]);
+        $this->assertCount(3, $inputData->arr('a1'));
+        $this->assertInstanceOf(InputData::class, $inputData->arr('a1'));
+        foreach ($inputData->arr('a1') as $i => $n) {
+            $this->assertSame($i->int() + 1, $n->int());
+        }
+        $this->assertSame([], (new InputData('foo'))->arr()->getData());
+        $this->assertSame(['a' => 1], (new InputData((object) ['a' => 1]))->arr()->getData());
+        // @todo test actual array values
+        // @todo test nested arrays
+        // @todo test object
+        // @todo test keys
+        // @todo test invalid data
+    }
+
+    public function testJson(): void
+    {
+        $inputData = new InputData([
+            'j1' => json_encode([1, 2, 3]),
+        ]);
+        $this->assertCount(3, $inputData->json('j1')->arr());
+        $this->assertInstanceOf(InputData::class, $inputData->json('j1'));
+        // @todo test simple values
+        // @todo test object
+        // @todo test invalid data
+        // $this->markTestIncomplete();
+    }
+
+    public function testDotDelimiters(): void
+    {
+        $inputData = new InputData([
+            'a' => [
+                'b' => [
+                    'c' => 123,
+                ],
+            ],
+        ]);
+        $this->assertSame(123, $inputData->int('a.b.c'));
+        $inputData = new InputData((object) [
+            'a' => (object) [
+                'b' => (object) [
+                    'c' => 123,
+                ],
+            ],
+        ]);
+        $this->assertSame(123, $inputData->int('a.b.c'));
+        $this->assertSame(456, $inputData->int('a.b.c.d.e', 456));
+    }
+
+    public function testCount(): void
+    {
+        $this->assertCount(3, new InputData(['a' => 1, 'b' => 2, 'c' => 3]));
+        $this->assertCount(0, new InputData('foo'));
+        $this->assertCount(0, new InputData(null));
+    }
+
+    public function testJsonEncode(): void
+    {
+        $this->assertSame('{"a":1,"b":2,"c":3}', json_encode(new InputData(['a' => 1, 'b' => 2, 'c' => 3])));
+        $this->assertSame('"foo"', json_encode(new InputData('foo')));
+    }
+
+    public function testToString(): void
+    {
+        $this->assertSame('foo', (string) new InputData('foo'));
     }
 }
