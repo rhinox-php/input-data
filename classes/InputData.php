@@ -99,45 +99,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return (string) $result;
     }
 
-    public function html(?string $name = null, ?string $default = ''): ?string
-    {
-        // @todo
-        $value = $this->string($name, $default);
-        if ($value === $default) {
-            return $default;
-        }
-        return cleanHtml($value);
-    }
-
-    public function uuid(?string $name = null, $default = null): ?string
-    {
-        // @todo
-        $string = $this->string($name, $default);
-        if ($string === $default || !$string || !uuidValid($string)) {
-            return $default;
-        }
-        return uuidBytes($string);
-    }
-
-    public function uuidString(?string $name = null, $default = null): ?string
-    {
-        // @todo
-        $string = $this->string($name, $default);
-        if ($string === $default || !$string || !uuidValid($string)) {
-            return $default;
-        }
-        return $string;
-    }
-
-    public function token(?string $name = null, $default = null): ?InputData
-    {
-        // @todo allow extending for things like this
-        $string = $this->string($name, $default);
-        if ($string === $default || !$string) {
-            return $default;
-        }
-        return Token::decode($string);
-    }
     /**
      * Parse a DateTime.
      *
@@ -176,10 +137,8 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input subarray
      * @param array  $default The default value if the item doesn't exist or is not an array
-     *
-     * @return \Rhino\InputData\InputData
      */
-    public function arr(?string $name = null, array $default = [])
+    public function arr(?string $name = null, array $default = []): InputData
     {
         if (!$name) {
             if (is_object($this->_data)) {
@@ -196,6 +155,17 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     }
 
     /**
+     * Returns a sub-object of input data.
+     *
+     * @param string $name    The name/key of input item
+     * @param mixed  $default The default value if the item doesn't exist
+     */
+    public function object(?string $name = null, array $default = []): InputData
+    {
+        return $this->arr($name, $default);
+    }
+
+    /**
      * JSON decode a value from the input data.
      *
      * @param string $name    The name/key of input item
@@ -203,7 +173,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return \Rhino\InputData\InputData
      */
-    public function json(?string $name = null, $default = [])
+    public function json(?string $name = null, $default = []): InputData
     {
         $value = $this->string($name);
         if (!$value) {
@@ -215,21 +185,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             }
         }
         return new static($value);
-    }
-
-    /**
-     * Returns a subobject of input data.
-     *
-     * @param string $name    The name/key of input item
-     * @param mixed  $default The default value if the item doesn't exist
-     *
-     * @return \Rhino\InputData\InputData
-     */
-    public function object($name, array $default = null)
-    {
-        [$data, $name] = $this->extractDataKey($name, $this->_data);
-
-        return $this->getValue($data, $name, $default);
     }
 
     /**
