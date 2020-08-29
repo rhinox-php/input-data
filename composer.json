@@ -1,11 +1,12 @@
 {
     "name": "rhinox/input-data",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Rhino\\InputData\\": "classes/"
         }
     },
-    "require": {
+    "require-dev": {
         "phpunit/phpunit": "^9.3"
     }
 }
