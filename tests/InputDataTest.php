@@ -81,7 +81,17 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
 
     public function testArray(): void
     {
-        $this->assertTrue((new InputData([]))->isArray());
+        $inputData = new InputData([
+            'foo' => [
+                1,
+            ],
+            'bar' => [[
+                'baz' => 2,
+            ]],
+        ]);
+        $this->assertTrue($inputData->isArray());
+        $this->assertSame(1, $inputData->arr('foo')->int(0));
+        $this->assertSame(2, $inputData->arr('bar')->arr(0)->int('baz'));
     }
 
     public function testExists(): void

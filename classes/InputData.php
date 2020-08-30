@@ -140,7 +140,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function arr(?string $name = null, array $default = []): InputData
     {
-        if (!$name) {
+        if ($name === null) {
             if (is_object($this->_data)) {
                 return new static((array) $this->_data);
             }
@@ -265,9 +265,9 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->_data;
     }
 
-    private static function getValue($data, $name, $default)
+    private static function getValue($data, ?string $name, $default)
     {
-        if (!$name) {
+        if ($name === null) {
             return $data;
         }
         if (is_array($data)) {
