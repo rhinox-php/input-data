@@ -329,6 +329,9 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->string();
     }
 
+    /**
+     * @return \Generator<InputData, InputData>
+     */
     public function getIterator(): \Generator
     {
         if (is_array($this->_data) || is_object($this->_data)) {
