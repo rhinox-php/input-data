@@ -138,7 +138,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name    The name/key of input subarray
      * @param array  $default The default value if the item doesn't exist or is not an array
      */
-    public function arr(?string $name = null, array $default = []): InputData
+    public function arr(?string $name = null, ?array $default = []): InputData
     {
         if ($name === null) {
             if (is_object($this->_data)) {
