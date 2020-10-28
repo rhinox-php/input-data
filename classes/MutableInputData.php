@@ -24,10 +24,18 @@ class MutableInputData extends InputData
         return new static($newData);
     }
 
-    public function filter(callable $callback): InputData
+    public function filter(?callable $callback = null): InputData
     {
-        // @todo
-        return $this;
+        if (!$callback) {
+            $callback = fn($value) => $value->_data != null;
+        }
+        $result = [];
+        foreach ($this as $key => $value) {
+            if ($callback($value, $key)) {
+                $result[$key->_data] = $value->_data;
+            }
+        }
+        return new static($result);
     }
 
     public function map(callable $callback): InputData
