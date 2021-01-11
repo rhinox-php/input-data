@@ -10,7 +10,7 @@ namespace Rhino\InputData;
 class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable
 {
     /**
-     * @var mixed[]
+     * @var mixed[]|object
      */
     protected $_data;
 

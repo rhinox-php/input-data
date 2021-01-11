@@ -5,10 +5,7 @@ namespace Rhino\InputData;
 class MutableInputData extends InputData
 {
 
-    /**
-     * @return \Rhino\InputData\InputData
-     */
-    public function extend(array $data)
+    public function extend(array $data): MutableInputData
     {
         $newData = [];
         if (is_object($this->_data)) {
@@ -24,7 +21,7 @@ class MutableInputData extends InputData
         return new static($newData);
     }
 
-    public function filter(?callable $callback = null): InputData
+    public function filter(?callable $callback = null): MutableInputData
     {
         if (!$callback) {
             $callback = fn($value) => $value->_data != null;
@@ -38,7 +35,7 @@ class MutableInputData extends InputData
         return new static($result);
     }
 
-    public function map(callable $callback): InputData
+    public function map(callable $callback): MutableInputData
     {
         $result = [];
         foreach ($this as $key => $value) {
@@ -47,7 +44,7 @@ class MutableInputData extends InputData
         return new static($result);
     }
 
-    public function mapRecursive(callable $callback): InputData
+    public function mapRecursive(callable $callback): MutableInputData
     {
         $result = [];
         foreach ($this as $key => $value) {
@@ -60,13 +57,18 @@ class MutableInputData extends InputData
         return new static($result);
     }
 
-    public function merge($data): InputData
+    public function merge($data): MutableInputData
     {
         $array = (new static($data))->arr()->getData();
         return new static(array_merge($this->arr()->getData(), $array));
     }
 
-    public function set(string $name, $value): InputData
+    public function values(): MutableInputData
+    {
+        return new static(array_values($this->arr()->getData()));
+    }
+
+    public function set(string $name, $value): MutableInputData
     {
         if ($value instanceof InputData) {
             $value = $value->_data;
@@ -82,7 +84,7 @@ class MutableInputData extends InputData
         return $this;
     }
 
-    function unset($name): InputData
+    function unset($name): MutableInputData
     {
         if (is_array($this->_data)) {
             unset($this->_data[$name]);
