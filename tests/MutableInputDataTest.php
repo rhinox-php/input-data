@@ -47,4 +47,79 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData->unset('str');
         $this->assertNull($inputData->raw('str'));
     }
+
+    public function testValues(): void {
+        $inputData = new MutableInputData([
+            0 => 'a',
+            2 => 'b',
+            7 => 'c',
+        ]);
+        $inputData->values();
+        $this->assertSame(['a', 'b', 'c'], $inputData->getData());
+    }
+
+    public function testMerge(): void {
+        $inputData = new MutableInputData(['a', 'b', 'c']);
+        $inputData->merge(['d', 'e', 'f']);
+        $this->assertSame(['a', 'b', 'c', 'd', 'e', 'f'], $inputData->getData());
+    }
+
+    public function testMap(): void {
+        $inputData = new MutableInputData([1, 2, 3]);
+        $inputData->map(fn($v) => $v->int() * 2);
+        $this->assertSame([2, 4, 6], $inputData->getData());
+    }
+
+    public function testMapRecursive(): void {
+        $inputData = new MutableInputData([1, [2, 3]]);
+        $inputData->mapRecursive(fn($v) => $v->int() * 2);
+        $this->assertSame([2, [4, 6]], $inputData->getData());
+    }
+
+    public function testFilter(): void {
+        $inputData = new MutableInputData([1, 2, 3, 4]);
+        $inputData->filter(fn($v) => $v->int() % 2 === 0);
+        $this->assertSame([1 => 2, 3 => 4], $inputData->getData());
+
+        $inputData = new MutableInputData([0, 1, 'a', null, '']);
+        $inputData->filter();
+        $this->assertSame([1 => 1, 2 => 'a'], $inputData->getData());
+    }
+
+    public function testExtend(): void {
+        $inputData = new MutableInputData((object) [
+            'customer' => [
+                'id' => '123',
+            ],
+        ]);
+        $inputData->extend([
+            'customer' => [
+                'name' => 'test',
+            ],
+        ], [
+            'customer' => [
+                'email' => 'test@example.com',
+            ],
+        ]);
+        $this->assertSame([
+            'customer' => [
+                'id' => '123',
+                'name' => 'test',
+                'email' => 'test@example.com',
+            ],
+        ], $inputData->getData());
+
+        $inputData = new MutableInputData('test');
+        $inputData->extend([
+            'customer' => [
+                'name' => 'test',
+            ],
+        ]);
+        $this->assertSame([
+            'customer' => [
+                'name' => 'test',
+            ],
+        ], $inputData->getData());
+
+    }
 }
