@@ -1,0 +1,15 @@
+<?php
+
+namespace Rhino\InputData\Tests\Extended;
+
+use Rhino\InputData\ImmutableInputData;
+
+class ExtendedImmutableInputData extends ImmutableInputData
+{
+    public function setHex(?string $name = null, $value): self
+    {
+        $data = $this->_data;
+        $data[$name] = bin2hex($value);
+        return $this->mutateData($data);
+    }
+}

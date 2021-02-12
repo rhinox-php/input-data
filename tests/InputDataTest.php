@@ -42,6 +42,13 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(3, new InputData(['a' => 1, 'b' => 2, 'c' => 3]));
         $this->assertCount(0, new InputData('foo'));
         $this->assertCount(0, new InputData(null));
+        $this->assertCount(7, new InputData(new class() implements \Countable
+        {
+            public function count()
+            {
+                return 7;
+            }
+        }));
     }
 
     public function testJsonEncode(): void
@@ -55,7 +62,14 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $inputData = InputData::jsonDecode('{"a":1,"b":2,"c":3}');
         $this->assertSame('1', $inputData->string('a'));
 
+        $inputData = InputData::jsonDecode('{"foo":{"bar":[1,2,3]}}', false);
+        $this->assertEquals((object) ['bar' => [1, 2, 3]], $inputData->object('foo')->getData());
+
+        $inputData = InputData::jsonDecode('{"foo":{"bar":[1,2,3]}}');
+        $this->assertSame(['bar' => [1, 2, 3]], $inputData->arr('foo')->getData());
+
         $this->expectException(ParseException::class);
+        $this->expectExceptionMessage('Error decoding JSON #4 Syntax error');
         InputData::jsonDecode('{"a":1,"b":2,"c":3');
     }
 
@@ -66,7 +80,8 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
 
     public function testClassToString(): void
     {
-        $this->assertSame('foo', (string) new InputData(new class {
+        $this->assertSame('foo', (string) new InputData(new class
+        {
             public function __toString()
             {
                 return 'foo';

@@ -1,23 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rhino\InputData;
 
 class MutableInputData extends InputData
 {
     use MutateData;
 
-    public function mutateData($data)
+    protected function mutateData($data)
     {
         $this->_data = $data;
         return $this;
     }
 
-    public function __set(string $name, $value)
+    public function __set($name, $value)
     {
         $this->set($name, $value);
     }
 
-    public function __unset(string $name)
+    public function __unset($name)
     {
         $this->unset($name);
     }

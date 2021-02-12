@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rhino\InputData;
 
 /**
@@ -210,9 +212,9 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return mixed[]
      */
-    public static function extractDataKey($name, $data)
+    protected static function extractDataKey(?string $name, $data)
     {
-        $parts = explode('.', $name);
+        $parts = explode('.', $name ?: '');
         while (count($parts) > 1) {
             $part = array_shift($parts);
             if (is_array($data)) {
@@ -230,7 +232,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         ];
     }
 
-    private function isCastable($value)
+    protected function isCastable($value)
     {
         if (is_scalar($value)) {
             return true;
@@ -265,7 +267,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->_data;
     }
 
-    private static function getValue($data, ?string $name, $default)
+    protected static function getValue($data, ?string $name, $default)
     {
         if ($name === null) {
             return $data;
@@ -298,7 +300,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return false;
     }
 
-    public function __get(string $name): InputData
+    public function __get($name): InputData
     {
         if (is_array($this->_data)) {
             return isset($this->_data[$name]) ? new static($this->_data[$name]) : new static(null);
@@ -306,12 +308,12 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return isset($this->_data->$name) ? new static($this->_data->$name) : new static(null);
     }
 
-    public function __set(string $name, $value)
+    public function __set($name, $value)
     {
         throw new MutationException('Cannot set property of non mutable input data');
     }
 
-    public function __isset(string $name): bool
+    public function __isset($name): bool
     {
         if (is_array($this->_data)) {
             return isset($this->_data[$name]);
@@ -319,7 +321,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return isset($this->_data->$name);
     }
 
-    public function __unset(string $name)
+    public function __unset($name)
     {
         throw new MutationException('Cannot unset property of non mutable input data');
     }

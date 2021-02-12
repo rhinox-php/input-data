@@ -2,3 +2,4 @@ vendor
 .vscode
 .test-output
 /.phpunit.result.cache
+/infection.log

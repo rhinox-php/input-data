@@ -81,6 +81,8 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(true, $inputData->bool('str'));
         $this->assertSame(true, $inputData->bool('t'));
         $this->assertSame(false, $inputData->bool('f'));
+        $this->assertSame(false, $inputData->bool('default'));
+        $this->assertSame(true, $inputData->bool('default', true));
 
         $this->assertSame(true, (new InputData(true))->bool());
         $this->assertSame(false, (new InputData(''))->bool());

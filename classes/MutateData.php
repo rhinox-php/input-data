@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rhino\InputData;
 
 trait MutateData
 {
-    public abstract function mutateData($data);
+    protected abstract function mutateData($data);
 
     public function extend(array ...$newData): self
     {
