@@ -1,0 +1,7 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "^7.3",
+        "ramsey/uuid": "^4.2",
+        "firebase/php-jwt": "^5.4"
+    }
+}
