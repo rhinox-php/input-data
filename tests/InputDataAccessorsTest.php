@@ -166,5 +166,8 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
 
         $inputData = new InputData(fopen(__FILE__, 'r'));
         $this->assertSame(123, $inputData->raw('def', 123));
+
+        $inputData = new InputData([1, 2, 3]);
+        $this->assertSame(1, $inputData->raw(0));
     }
 }

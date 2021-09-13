@@ -197,7 +197,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @return mixed
      */
-    public function raw($name, $default = null)
+    public function raw(string $name, $default = null)
     {
         [$data, $name] = $this->extractDataKey($name, $this->_data);
 
