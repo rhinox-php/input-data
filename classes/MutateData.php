@@ -6,7 +6,7 @@ namespace Rhino\InputData;
 
 trait MutateData
 {
-    protected abstract function mutateData($data);
+    abstract protected function mutateData($data);
 
     public function extend(array ...$newData): self
     {
