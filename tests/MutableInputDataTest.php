@@ -27,6 +27,10 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData = new MutableInputData(null);
         $inputData->set('str', new InputData('5'));
         $this->assertSame('5', $inputData->string('str'));
+
+        $inputData = new MutableInputData(['str' => ['foo' => 'bar']]);
+        $inputData->set('str.foo', 'baz');
+        $this->assertSame('baz', $inputData->raw('str.foo'));
     }
 
     public function testUnset(): void
@@ -46,6 +50,10 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData = new MutableInputData((object) ['str' => 'foo']);
         $inputData->unset('str');
         $this->assertNull($inputData->raw('str'));
+
+        $inputData = new MutableInputData(['str' => ['foo' => 'bar']]);
+        $inputData->unset('str.foo');
+        $this->assertNull($inputData->raw('str.foo'));
     }
 
     public function testValues(): void {

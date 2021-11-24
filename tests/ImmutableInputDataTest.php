@@ -93,4 +93,20 @@ class ImmutableInputDataTest extends \PHPUnit\Framework\TestCase
             ],
         ], $inputData2->getData());
     }
+
+    public function testSet(): void
+    {
+        $inputData = new ImmutableInputData(['str' => ['foo' => 'bar']]);
+        $newInputData = $inputData->set('str.foo', 'baz');
+        $this->assertSame('bar', $inputData->raw('str.foo'));
+        $this->assertSame('baz', $newInputData->raw('str.foo'));
+    }
+
+    public function testUnset(): void
+    {
+        $inputData = new ImmutableInputData(['str' => ['foo' => 'bar']]);
+        $newInputData = $inputData->unset('str.foo');
+        $this->assertSame('bar', $inputData->raw('str.foo'));
+        $this->assertNull($newInputData->raw('str.foo'));
+    }
 }

@@ -70,30 +70,61 @@ trait MutateData
         return $this;
     }
 
-    public function set(string $name, $value): self
+    public function set(string $name, $value): InputData
     {
-        $data = $this->_data;
-        if ($value instanceof InputData) {
+        if ($value instanceof static) {
             $value = $value->_data;
         }
-        if (is_object($data)) {
-            $data->$name = $value;
-        } elseif (!is_array($data)) {
-            $data = [];
-            $data[$name] = $value;
-        } else {
-            $data[$name] = $value;
+
+        $data = $this->_data;
+        $d = &$data;
+
+        foreach (explode('.', $name) as $part) {
+            if (is_object($d)) {
+                if (!isset($d->$part)) {
+                    $d->$part = [];
+                }
+                $d = &$d->$part;
+            } else {
+                if (!isset($d[$part]) || !is_array($d[$part])) {
+                    $d[$part] = [];
+                }
+                $d = &$d[$part];
+            }
         }
+
+        $d = $value;
         return $this->mutateData($data);
     }
 
     public function unset($name): self
     {
         $data = $this->_data;
-        if (is_array($data)) {
-            unset($data[$name]);
-        } else {
-            unset($data->$name);
+        $d = &$data;
+        $parts  = explode('.', $name);
+        $finalPart = count($parts) - 1;
+        foreach ($parts as $i => $part) {
+            if (is_object($d)) {
+                if (!isset($d->$part)) {
+                    break;
+                }
+                if ($i === $finalPart) {
+                    unset($d->$part);
+                    break;
+                }
+                $d = &$d->$part;
+            } elseif (is_array($d)) {
+                if (!isset($d[$part])) {
+                    break;
+                }
+                if ($i === $finalPart) {
+                    unset($d[$part]);
+                    break;
+                }
+                $d = &$d[$part];
+            } else {
+                break;
+            }
         }
         return $this->mutateData($data);
     }

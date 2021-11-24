@@ -114,5 +114,6 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue((new InputData(['a' => 1]))->exists('a'));
         $this->assertTrue((new InputData((object) ['a' => 1]))->exists('a'));
         $this->assertFalse((new InputData(null))->exists('b'));
+        $this->assertTrue((new InputData(['a' => ['b' => 'c']]))->exists('a.b'));
     }
 }
