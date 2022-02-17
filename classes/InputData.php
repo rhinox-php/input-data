@@ -346,17 +346,17 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->__isset($offset);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->__get($offset);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new MutationException('Cannot set offset of non mutable input data');
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new MutationException('Cannot unset offset of non mutable input data');
     }
@@ -372,7 +372,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return 0;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->getData();
     }
@@ -386,5 +386,15 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             throw new ParseException('Error decoding JSON #' . $errorCode . ' ' . $message);
         }
         return new static($json);
+    }
+
+    public function find($callback): InputData
+    {
+        foreach ($this as $key => $value) {
+            if ($callback($value, $key)) {
+                return new static($value);
+            }
+        }
+        return new static(null);
     }
 }

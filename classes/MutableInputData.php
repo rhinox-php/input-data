@@ -24,12 +24,12 @@ class MutableInputData extends InputData
         $this->unset($name);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->set($offset, $value);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $this->unset($offset);
     }

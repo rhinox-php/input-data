@@ -6,7 +6,7 @@ use Rhino\InputData\MutableInputData;
 
 class ExtendedMutableInputData extends MutableInputData
 {
-    public function setHex(?string $name = null, $value): self
+    public function setHex(?string $name, $value): self
     {
         $data = $this->_data;
         $data[$name] = bin2hex($value);

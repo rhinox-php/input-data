@@ -44,7 +44,7 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(0, new InputData(null));
         $this->assertCount(7, new InputData(new class() implements \Countable
         {
-            public function count()
+            public function count(): int
             {
                 return 7;
             }
@@ -115,5 +115,11 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue((new InputData((object) ['a' => 1]))->exists('a'));
         $this->assertFalse((new InputData(null))->exists('b'));
         $this->assertTrue((new InputData(['a' => ['b' => 'c']]))->exists('a.b'));
+    }
+
+    public function testFind(): void
+    {
+        $this->assertSame(1, (new InputData(['a' => 1, 'b' => 1]))->find(fn($value) => $value->int() === 1)->int());
+        $this->assertSame(2, (new InputData(['a' => 1, 'b' => 2]))->find(fn($value, $key) => $key->string() === 'b')->int());
     }
 }
