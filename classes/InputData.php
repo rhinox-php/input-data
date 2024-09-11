@@ -143,28 +143,42 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     public function arr(?string $name = null, ?array $default = []): InputData
     {
         if ($name === null) {
-            if (is_object($this->_data)) {
-                return new static((array) $this->_data);
-            }
-            if (is_array($this->_data)) {
-                return new static($this->_data);
-            }
-            return new static($default);
+            $value = $this->_data;
+        } else {
+            [$data, $name] = $this->extractDataKey($name, $this->_data);
+            $value = $this->getValue($data, $name, $default);
         }
-        [$data, $name] = $this->extractDataKey($name, $this->_data);
-
-        return new static($this->getValue($data, $name, $default));
+        if (is_object($value)) {
+            return new static((array) $value);
+        }
+        if (is_array($value)) {
+            return new static($value);
+        }
+        return new static($default);
     }
 
     /**
      * Returns a sub-object of input data.
      *
+     * @todo consider removing this
      * @param string $name    The name/key of input item
      * @param mixed  $default The default value if the item doesn't exist
      */
-    public function object(?string $name = null, array $default = []): InputData
+    public function object(?string $name = null, $default = null): InputData
     {
-        return $this->arr($name, $default);
+        if ($name === null) {
+            $value = $this->_data;
+        } else {
+            [$data, $name] = $this->extractDataKey($name, $this->_data);
+            $value = $this->getValue($data, $name, $default);
+        }
+        if (is_object($value)) {
+            return new static($value);
+        }
+        if (is_array($value)) {
+            return new static((object) $value);
+        }
+        return new static($default);
     }
 
     /**
