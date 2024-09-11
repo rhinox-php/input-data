@@ -22,6 +22,9 @@ trait MutateData
         return $this->mutateData($result);
     }
 
+    /**
+     * Removes elements from data if the callback doesn't return a truthy value. If no callback is supplied it check if the value is truthy.
+     */
     public function filter(?callable $callback = null): self
     {
         if (!$callback) {
@@ -31,6 +34,24 @@ trait MutateData
         foreach ($this as $key => $value) {
             if ($callback($value, $key)) {
                 $result[$key->_data] = $value->_data;
+            }
+        }
+        return $this->mutateData($result);
+    }
+
+    public function filterRecursive(?callable $callback = null): self
+    {
+        if (!$callback) {
+            $callback = fn ($value) => $value->_data != null;
+        }
+        $result = [];
+        foreach ($this as $key => $value) {
+            if (is_iterable($value->_data)) {
+                $result[$key->_data] = (new static($value))->filterRecursive($callback)->_data;
+            } else {
+                if ($callback($value, $key)) {
+                    $result[$key->_data] = $value->_data;
+                }
             }
         }
         return $this->mutateData($result);
