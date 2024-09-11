@@ -73,6 +73,15 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         InputData::jsonDecode('{"a":1,"b":2,"c":3');
     }
 
+    public function testTryJsonDecode(): void
+    {
+        $inputData = InputData::tryJsonDecode('invalid');
+        $this->assertNull($inputData->getData());
+
+        $inputData = InputData::tryJsonDecode('{"a":1,"b":2,"c":3}');
+        $this->assertSame('1', $inputData->string('a'));
+    }
+
     public function testToString(): void
     {
         $this->assertSame('foo', (string) new InputData('foo'));
