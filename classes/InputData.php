@@ -411,6 +411,24 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         }
     }
 
+    public static function jsonDecodeFile(string $filename, bool $assoc = true): static
+    {
+        $json = @file_get_contents($filename);
+        if ($json === false) {
+            throw new FileReadException('Error reading file ' . $filename);
+        }
+        return static::jsonDecode($json, $assoc);
+    }
+
+    public static function tryJsonDecodeFile(string $filename, bool $assoc = true): static
+    {
+        try {
+            return static::jsonDecodeFile($filename, $assoc);
+        } catch (FileReadException | ParseException $exception) {
+            return new static(null);
+        }
+    }
+
     public function find($callback): InputData
     {
         foreach ($this as $key => $value) {

@@ -1,0 +1,10 @@
+{
+    "foo": "bar",
+    "seven": "7.5",
+    "july3": "2021-07-03 11:45:30",
+    "fruit": [
+        "apple",
+        "banana",
+        "pear"
+    ]
+}

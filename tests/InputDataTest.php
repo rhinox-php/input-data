@@ -82,6 +82,21 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('1', $inputData->string('a'));
     }
 
+    public function testJsonDecodeFile(): void
+    {
+        $inputData = InputData::jsonDecodeFile(__DIR__ . '/data.json');
+        $this->assertSame('bar', $inputData->string('foo'));
+    }
+
+    public function testTryJsonDecodeFile(): void
+    {
+        $inputData = InputData::tryJsonDecodeFile(__DIR__ . '/data.json');
+        $this->assertSame('bar', $inputData->string('foo'));
+
+        $inputData = InputData::tryJsonDecodeFile(__DIR__ . '/invalid.json');
+        $this->assertNull($inputData->getData());
+    }
+
     public function testToString(): void
     {
         $this->assertSame('foo', (string) new InputData('foo'));
