@@ -12,10 +12,39 @@
         }
     },
     "require-dev": {
-        "vimeo/psalm": "^4.10",
-        "phpmd/phpmd": "^2.10",
-        "phpunit/phpunit": "^9.5",
-        "infection/infection": "^0.25.0",
-        "friendsofphp/php-cs-fixer": "^3.1"
+        "vimeo/psalm": "^6.13",
+        "phpmd/phpmd": "^2.15",
+        "phpunit/phpunit": "^12.3",
+        "infection/infection": "^0.31",
+        "friendsofphp/php-cs-fixer": "^3.87"
+    },
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
+    },
+    "scripts": {
+        "test:unit": "phpunit",
+        "test:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "phpunit --order-by=random --coverage-xml .test-output/coverage-xml --coverage-html .test-output/coverage --log-junit .test-output/report.xml -d memory_limit=-1"
+        ],
+        "test:coverage-text": [
+            "@putenv XDEBUG_MODE=coverage",
+            "phpunit --coverage-text -d memory_limit=-1"
+        ],
+        "lint:fix": "php-cs-fixer fix --config=lint.config.php classes/",
+        "lint:check": "php-cs-fixer fix --config=lint.config.php --dry-run classes/",
+        "analyze": [
+            "@analyze:psalm",
+            "@analyze:phpmd"
+        ],
+        "analyze:psalm": "psalm --threads=4",
+        "analyze:phpmd": "phpmd classes text unusedcode,naming,design,controversial,codesize",
+        "qa": [
+            "@lint:dry",
+            "@analyze",
+            "@test"
+        ]
     }
 }

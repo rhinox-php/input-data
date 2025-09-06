@@ -32,8 +32,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input item
      * @param bool   $default The default value if the item doesn't exist
-     *
-     * @return bool
      */
     public function bool(?string $name = null, ?bool $default = false): ?bool
     {
@@ -50,8 +48,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input item
      * @param int    $default The default value if the item doesn't exist
-     *
-     * @return int
      */
     public function int(?string $name = null, ?int $default = 0): ?int
     {
@@ -68,8 +64,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input item
      * @param float  $default The default value if the item doesn't exist
-     *
-     * @return float
      */
     public function decimal(?string $name = null, ?float $default = 0): ?float
     {
@@ -88,8 +82,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input item
      * @param string|null|mixed $default The default value if the item doesn't exist
-     *
-     * @return string
      */
     public function string(?string $name = null, ?string $default = ''): ?string
     {
@@ -107,8 +99,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name     The name/key of input item
      * @param string $timezone The timezone identifier to use for the result, if null the default or input is used
      * @param string $default  The default date/time string to use if the item doesn't exist or is invalid
-     *
-     * @return \DateTimeImmutable
      */
     public function dateTime(?string $name, ?string $timezone = null, ?string $default = null): ?\DateTimeImmutable
     {
@@ -186,8 +176,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      *
      * @param string $name    The name/key of input item
      * @param array  $default The default value if the item doesn't exist
-     *
-     * @return \Rhino\InputData\InputData
      */
     public function json(?string $name = null, $default = []): InputData
     {

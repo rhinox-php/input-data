@@ -3,23 +3,21 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
         backupGlobals="false"
-        backupStaticAttributes="false"
         bootstrap="phpunit-bootstrap.php"
         colors="true"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
+        displayDetailsOnPhpunitDeprecations="true"
+        displayDetailsOnTestsThatTriggerDeprecations="true"
         processIsolation="false"
         stopOnError="false"
         stopOnFailure="false"
         stopOnIncomplete="false"
         stopOnRisky="false"
         stopOnSkipped="false">
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">./classes</directory>
         </include>
-    </coverage>
+    </source>
     <testsuites>
         <testsuite name="base">
             <directory>./tests/</directory>

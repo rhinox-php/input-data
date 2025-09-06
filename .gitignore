@@ -3,3 +3,4 @@ vendor
 .test-output
 /.phpunit.result.cache
 /infection.log
+*claude*

@@ -2,7 +2,7 @@
 
 $finder = \PhpCsFixer\Finder::create()
     ->in([
-        realpath(__DIR__ . '/../classes'),
+        realpath(__DIR__ . '/classes'),
     ]);
 
 return (new \PhpCsFixer\Config())
