@@ -1,6 +1,6 @@
 # InputData
 
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.0-blue.svg)](https://php.net/)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.4-blue.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-100%25%20coverage-brightgreen.svg)](phpunit.xml)
 
@@ -589,7 +589,7 @@ $uuid = $data->uuid('id'); // Returns the UUID or null if invalid
 ## Development
 
 ### Requirements
-- PHP 8.0 or higher
+- PHP 8.4 or higher
 - Composer for dependency management
 
 ### Development Tools
