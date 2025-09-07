@@ -28,7 +28,7 @@ trait MutateData
     public function filter(?callable $callback = null): self
     {
         if (!$callback) {
-            $callback = fn ($value) => $value->_data != null;
+            $callback = fn ($value): bool => $value->_data != null;
         }
         $result = [];
         foreach ($this as $key => $value) {
@@ -42,7 +42,7 @@ trait MutateData
     public function filterRecursive(?callable $callback = null): self
     {
         if (!$callback) {
-            $callback = fn ($value) => $value->_data != null;
+            $callback = fn ($value): bool => $value->_data != null;
         }
         $result = [];
         foreach ($this as $key => $value) {

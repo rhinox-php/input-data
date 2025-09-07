@@ -8,6 +8,7 @@ class ImmutableInputData extends InputData
 {
     use MutateData;
 
+    #[\Override]
     protected function mutateData($data)
     {
         return new static($data);

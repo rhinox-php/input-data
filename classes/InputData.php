@@ -230,7 +230,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         ];
     }
 
-    protected function isCastable($value)
+    protected function isCastable($value): bool
     {
         if (is_scalar($value)) {
             return true;
@@ -285,7 +285,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $default;
     }
 
-    public function exists($name)
+    public function exists($name): bool
     {
         [$data, $name] = $this->extractDataKey($name, $this->_data);
 
@@ -332,6 +332,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     /**
      * @return \Generator<InputData, InputData>
      */
+    #[\Override]
     public function getIterator(): \Generator
     {
         if (is_array($this->_data) || is_object($this->_data)) {
@@ -341,26 +342,31 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         }
     }
 
+    #[\Override]
     public function offsetExists($offset): bool
     {
         return $this->__isset($offset);
     }
 
+    #[\Override]
     public function offsetGet($offset): mixed
     {
         return $this->__get($offset);
     }
 
+    #[\Override]
     public function offsetSet($offset, $value): void
     {
         throw new MutationException('Cannot set offset of non mutable input data');
     }
 
+    #[\Override]
     public function offsetUnset($offset): void
     {
         throw new MutationException('Cannot unset offset of non mutable input data');
     }
 
+    #[\Override]
     public function count(): int
     {
         if (!$this->_data) {
@@ -372,6 +378,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return 0;
     }
 
+    #[\Override]
     public function jsonSerialize(): mixed
     {
         return $this->getData();
