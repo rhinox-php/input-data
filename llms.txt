@@ -1,0 +1,217 @@
+# InputData
+
+InputData is a PHP library for parsing user input data with safe type casting, sensible defaults, and robust error handling.
+
+## Project Overview
+
+This library helps parse data from potentially unreliable sources (user input, APIs, file imports) with predictable behavior and fallback defaults. It does not replace validation or sanitization but provides best-effort parsing.
+
+## Key Features
+
+- Safe type casting with fallback defaults
+- Dot notation for nested data access
+- Comprehensive data types: strings, integers, decimals, booleans, dates, arrays, JSON
+- Mutable and Immutable variants
+- ArrayAccess, Countable, Iterable interfaces
+- 100% test coverage
+
+## Architecture
+
+### Core Classes
+- `InputData`: Base immutable class with type casting methods
+- `MutableInputData`: Extends InputData, methods modify current instance
+- `ImmutableInputData`: Extends InputData, methods return new instances
+- `MutateData`: Trait providing data transformation methods
+
+### Design Patterns
+- PSR-4 autoloading: `Rhino\InputData\` -> `classes/`
+- ArrayAccess interface for array-like access
+- Fluent interface for method chaining
+- Exception hierarchy with custom exceptions
+
+## Usage Examples
+
+### Basic Usage
+```php
+$data = new InputData(['name' => 'John', 'age' => '30']);
+echo $data->string('name');  // "John"
+echo $data->int('age');      // 30
+echo $data->string('missing', 'N/A'); // "N/A"
+```
+
+### Dot Notation
+```php
+$data = new InputData(['user' => ['profile' => ['email' => 'john@example.com']]]);
+echo $data->string('user.profile.email'); // "john@example.com"
+```
+
+### JSON Processing
+```php
+$data = InputData::jsonDecode('{"name":"John","active":true}');
+$config = InputData::tryJsonDecodeFile('config.json');
+```
+
+### Data Modification
+```php
+// Mutable
+$data = new MutableInputData(['a' => 1]);
+$data->set('b', 2)->filter(fn($v) => $v->int() > 0);
+
+// Immutable
+$original = new ImmutableInputData(['a' => 1]);
+$modified = $original->set('b', 2)->filter(fn($v) => $v->int() > 0);
+```
+
+## Type Casting Methods
+
+All methods follow pattern: `method(?string $key = null, $default): ?type`
+
+- `string()`: Cast to string with empty string default
+- `int()`: Cast to integer with 0 default
+- `decimal()`: Cast to float with 0.0 default
+- `bool()`: Cast to boolean with false default
+- `dateTime()`: Parse DateTime with timezone support
+- `arr()`: Get array data as new InputData instance
+- `object()`: Get object data, converts arrays to objects
+- `json()`: Parse JSON string into InputData
+- `raw()`: Get raw value without casting
+
+## Data Modification Methods
+
+Available on Mutable/ImmutableInputData:
+
+- `extend()`: Recursively merge arrays
+- `set()`: Set value at path (supports dot notation)
+- `unset()`: Remove value at path
+- `filter()`: Filter data with callback
+- `filterRecursive()`: Recursively filter nested data
+- `map()`: Transform values with callback
+- `mapRecursive()`: Recursively transform data
+- `values()`: Re-index to sequential keys
+- `merge()`: Merge with another array/InputData
+
+## File Structure
+
+```
+classes/
+├── InputData.php           # Base class with type casting
+├── MutableInputData.php    # Mutable variant
+├── ImmutableInputData.php  # Immutable variant
+├── MutateData.php         # Data modification trait
+├── InputDataException.php  # Base exception
+├── FileReadException.php   # File read errors
+└── MutationException.php   # Mutation errors
+
+tests/                      # 100% test coverage
+├── InputDataTest.php
+├── MutableInputDataTest.php
+├── ImmutableInputDataTest.php
+├── InputDataAccessorsTest.php
+├── ArrayAccessTest.php
+├── ObjectAccessTest.php
+├── ExtendTest.php
+├── InputDataEdgeCasesTest.php
+├── AdditionalCoverageTest.php
+└── data.json              # Test fixture
+
+composer.json              # Dependencies and scripts
+phpunit.xml                # PHPUnit configuration
+lint.config.php            # PHP CS Fixer config
+psalm.xml                  # Psalm static analysis
+CLAUDE.md                  # Development instructions
+```
+
+## Development Workflow
+
+### Testing
+- `composer test:unit`: Run all tests
+- `composer test:coverage`: Generate HTML coverage report
+- `composer test:coverage-text`: Text coverage report
+
+### Code Quality
+- `composer lint:check`: Check code style
+- `composer lint:fix`: Fix code style issues
+- `composer analyze`: Run static analysis (Psalm + PHPMD)
+- `composer qa`: Full quality assurance suite
+
+### Development Tools
+- PHPUnit 12.3+ for testing
+- PHP CS Fixer for code formatting
+- Psalm for static analysis
+- PHPMD for mess detection
+- Infection for mutation testing
+
+## Common Use Cases
+
+### HTTP Request Processing
+```php
+$post = new InputData($_POST);
+$userId = $post->int('user_id');
+$email = $post->string('email');
+```
+
+### API Response Handling
+```php
+$response = (new GuzzleClient())->get('https://api.example.com/user/1');
+$data = InputData::tryJsonDecode($response->getBody());
+$userName = $data->string('name', 'Unknown User');
+```
+
+### File Import
+```php
+foreach (readCsv('users.csv') as $row) {
+    $name = $row->string(0);
+    $age = $row->int(1, 0);
+    $joinDate = $row->dateTime(2, 'UTC');
+}
+```
+
+### Configuration Loading
+```php
+$config = InputData::tryJsonDecodeFile('config.json');
+$dbHost = $config->string('database.host', 'localhost');
+$dbPort = $config->int('database.port', 3306);
+```
+
+## Extension Example
+
+```php
+class CustomInputData extends InputData 
+{
+    public function uuid(?string $name = null, ?string $default = null): ?string 
+    {
+        $value = $this->string($name, $default);
+        return preg_match('/^[0-9a-f-]{36}$/i', $value) ? $value : $default;
+    }
+    
+    public function email(?string $name = null, ?string $default = null): ?string
+    {
+        $value = $this->string($name, $default);
+        return filter_var($value, FILTER_VALIDATE_EMAIL) ?: $default;
+    }
+}
+```
+
+## Error Handling
+
+The library uses specific exceptions:
+- `JsonException`: JSON parsing errors (native PHP exception)
+- `FileReadException`: File access errors
+- `MutationException`: Attempts to modify immutable data
+- `InputDataException`: Base exception class
+
+## Requirements
+
+- PHP 8.0+
+- Composer for dependency management
+- Extensions: json (standard)
+
+## Installation
+
+```bash
+composer require rhinox/input-data
+```
+
+## License
+
+MIT License - see LICENSE file for details.
