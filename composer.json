@@ -1,5 +1,6 @@
 {
     "name": "rhinox/input-data",
+    "description": "PHP library for parsing user input data with safe type casting, sensible defaults, and robust error handling",
     "license": "MIT",
     "autoload": {
         "psr-4": {
