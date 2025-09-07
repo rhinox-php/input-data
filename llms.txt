@@ -131,14 +131,13 @@ CLAUDE.md                  # Development instructions
 ### Code Quality
 - `composer lint:check`: Check code style
 - `composer lint:fix`: Fix code style issues
-- `composer analyze`: Run static analysis (Psalm + PHPMD)
+- `composer analyze`: Run static analysis (Psalm)
 - `composer qa`: Full quality assurance suite
 
 ### Development Tools
 - PHPUnit 12.3+ for testing
 - PHP CS Fixer for code formatting
 - Psalm for static analysis
-- PHPMD for mess detection
 - Infection for mutation testing
 
 ## Common Use Cases
@@ -176,14 +175,14 @@ $dbPort = $config->int('database.port', 3306);
 ## Extension Example
 
 ```php
-class CustomInputData extends InputData 
+class CustomInputData extends InputData
 {
-    public function uuid(?string $name = null, ?string $default = null): ?string 
+    public function uuid(?string $name = null, ?string $default = null): ?string
     {
         $value = $this->string($name, $default);
         return preg_match('/^[0-9a-f-]{36}$/i', $value) ? $value : $default;
     }
-    
+
     public function email(?string $name = null, ?string $default = null): ?string
     {
         $value = $this->string($name, $default);

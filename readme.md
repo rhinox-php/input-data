@@ -598,7 +598,6 @@ The project uses modern PHP development tools:
 - **PHPUnit**: Testing framework with 100% code coverage
 - **PHP CS Fixer**: Code formatting and style checking
 - **Psalm**: Static analysis for type safety
-- **PHPMD**: Mess detection for code quality
 - **Infection**: Mutation testing
 
 ### Running Tests
