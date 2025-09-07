@@ -88,7 +88,6 @@ trait MutateData
     public function values(): self
     {
         return $this->mutateData(array_values($this->arr()->getData()));
-        return $this;
     }
 
     public function set(string $name, $value): InputData

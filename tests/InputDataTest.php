@@ -146,5 +146,28 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertSame(1, (new InputData(['a' => 1, 'b' => 1]))->find(fn($value) => $value->int() === 1)->int());
         $this->assertSame(2, (new InputData(['a' => 1, 'b' => 2]))->find(fn($value, $key) => $key->string() === 'b')->int());
+        
+        // Test find that returns no match
+        $this->assertNull((new InputData(['a' => 1, 'b' => 2]))->find(fn($value) => $value->int() === 999)->getData());
+    }
+
+    public function testJsonDecodeFileErrorHandling(): void
+    {
+        // Test file not found exception
+        $this->expectException(\Rhino\InputData\FileReadException::class);
+        $this->expectExceptionMessage('Error reading file /nonexistent/file.json');
+        InputData::jsonDecodeFile('/nonexistent/file.json');
+    }
+
+    public function testTryJsonDecodeFileWithInvalidJson(): void
+    {
+        // Create a temporary file with invalid JSON
+        $tempFile = tempnam(sys_get_temp_dir(), 'invalid_json');
+        file_put_contents($tempFile, '{"invalid": json}');
+        
+        $inputData = InputData::tryJsonDecodeFile($tempFile);
+        $this->assertNull($inputData->getData());
+        
+        unlink($tempFile);
     }
 }

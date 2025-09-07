@@ -175,4 +175,31 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
             ],
         ], $inputData->getData());
     }
+
+    public function testUnsetWithComplexObjectPaths(): void
+    {
+        // Test unset with objects and nested paths that don't exist
+        $inputData = new MutableInputData((object) ['a' => (object) ['b' => 'value']]);
+        $inputData->unset('a.nonexistent.path');
+        $this->assertSame('value', $inputData->raw('a.b'));
+
+        // Test unset with non-array/object data
+        $inputData = new MutableInputData(['a' => 'string']);
+        $inputData->unset('a.b.c');
+        $this->assertSame('string', $inputData->raw('a'));
+    }
+
+    public function testSetWithComplexObjectPaths(): void
+    {
+        // Test setting deep paths in objects
+        $inputData = new MutableInputData((object) []);
+        $inputData->set('a.b.c', 'value');
+        $this->assertSame('value', $inputData->raw('a.b.c'));
+
+        // Test setting with existing object structure
+        $inputData = new MutableInputData((object) ['a' => (object) ['existing' => 'data']]);
+        $inputData->set('a.b.c', 'value');
+        $this->assertSame('data', $inputData->raw('a.existing'));
+        $this->assertSame('value', $inputData->raw('a.b.c'));
+    }
 }
