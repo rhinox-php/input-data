@@ -377,14 +377,9 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return $this->getData();
     }
 
-    public static function jsonDecode(string $jsonString, bool $assoc = true): static
+    public static function jsonDecode(string $jsonString, bool $assoc = true, int $depth = 512, $flags = JSON_THROW_ON_ERROR): static
     {
-        $json = json_decode($jsonString, $assoc);
-        $errorCode = json_last_error();
-        if ($errorCode) {
-            $message = json_last_error_msg();
-            throw new ParseException('Error decoding JSON #' . $errorCode . ' ' . $message);
-        }
+        $json = json_decode($jsonString, $assoc, $depth, $flags);
         return new static($json);
     }
 
@@ -392,7 +387,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     {
         try {
             return static::jsonDecode($jsonString, $assoc);
-        } catch (ParseException $exception) {
+        } catch (\JsonException $exception) {
             return new static(null);
         }
     }
@@ -410,7 +405,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     {
         try {
             return static::jsonDecodeFile($filename, $assoc);
-        } catch (FileReadException | ParseException $exception) {
+        } catch (FileReadException | \JsonException $exception) {
             return new static(null);
         }
     }

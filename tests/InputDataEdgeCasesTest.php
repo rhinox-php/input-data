@@ -55,20 +55,4 @@ class InputDataEdgeCasesTest extends \PHPUnit\Framework\TestCase
         }
         $this->assertEmpty($items);
     }
-
-    public function testExceptionClasses(): void
-    {
-        // Ensure all exception classes are instantiable (for coverage)
-        $parseException = new \Rhino\InputData\ParseException('test');
-        $this->assertInstanceOf(\Exception::class, $parseException);
-
-        $fileReadException = new \Rhino\InputData\FileReadException('test');
-        $this->assertInstanceOf(\Exception::class, $fileReadException);
-
-        $mutationException = new \Rhino\InputData\MutationException('test');
-        $this->assertInstanceOf(\Exception::class, $mutationException);
-
-        $inputDataException = new \Rhino\InputData\InputDataException('test');
-        $this->assertInstanceOf(\Exception::class, $inputDataException);
-    }
 }
