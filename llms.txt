@@ -202,7 +202,7 @@ The library uses specific exceptions:
 
 ## Requirements
 
-- PHP 8.0+
+- PHP 8.4+
 - Composer for dependency management
 - Extensions: json (standard)
 
