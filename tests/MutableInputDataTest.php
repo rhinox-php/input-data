@@ -54,6 +54,10 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData = new MutableInputData(['str' => ['foo' => 'bar']]);
         $inputData->unset('str.foo');
         $this->assertNull($inputData->raw('str.foo'));
+
+        $inputData = new MutableInputData(['str' => 'foo']);
+        $inputData->unset('foo');
+        $this->assertNotNull($inputData->raw('str'));
     }
 
     public function testValues(): void
@@ -137,6 +141,24 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         ]);
         $inputData->filterRecursive(fn ($v, $k) => $k->string() === 'a');
         $this->assertSame([['a' => 1], ['a' => 3, 'c' => []]], $inputData->getData());
+
+        // Test filterRecursive with default callback (null values)
+        $inputData = new MutableInputData([
+            'valid' => 'data',
+            'nested' => [
+                'null_value' => null,
+                'valid_nested' => 'value',
+                'empty_string' => '',
+            ],
+            'null_top' => null,
+        ]);
+        $inputData->filterRecursive(); // No callback provided - should filter out null values
+        $this->assertSame([
+            'valid' => 'data',
+            'nested' => [
+                'valid_nested' => 'value',
+            ],
+        ], $inputData->getData());
     }
 
     public function testExtend(): void
@@ -201,5 +223,11 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData->set('a.b.c', 'value');
         $this->assertSame('data', $inputData->raw('a.existing'));
         $this->assertSame('value', $inputData->raw('a.b.c'));
+    }
+
+    public function testNestedSet() {
+        $inputData = new MutableInputData(['foo' => 'bar']);
+        $inputData->set('foo', new InputData('baz'));
+        $this->assertSame(['foo' => 'baz'], $inputData->getData());
     }
 }

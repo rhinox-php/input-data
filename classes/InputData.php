@@ -21,7 +21,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function __construct($_data = [])
     {
-        if ($_data instanceof static) {
+        if ($_data instanceof InputData) {
             $_data = $_data->_data;
         }
         $this->_data = $_data;

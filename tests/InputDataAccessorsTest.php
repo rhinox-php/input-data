@@ -162,6 +162,11 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals((object) [
             'i1' => 123,
         ], $inputData->object('o1')->getData());
+
+        $inputData = new InputData([
+            'o2' => ['i2' => 456],
+        ]);
+        $this->assertEquals((object) ['i2' => 456], $inputData->object('o2')->getData());
     }
 
     public function testJson(): void

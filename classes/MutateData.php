@@ -92,7 +92,7 @@ trait MutateData
 
     public function set(string $name, $value): InputData
     {
-        if ($value instanceof static) {
+        if ($value instanceof InputData) {
             $value = $value->_data;
         }
 
