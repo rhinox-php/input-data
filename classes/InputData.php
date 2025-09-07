@@ -75,8 +75,6 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return (float) $result;
     }
 
-    // @todo support big number types
-
     /**
      * Cast to an string.
      *
@@ -148,9 +146,9 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     }
 
     /**
-     * Returns a sub-object of input data.
+     * Returns a sub-object of input data. Converts arrays to objects when needed.
+     * This method provides object-oriented access to nested data structures.
      *
-     * @todo consider removing this
      * @param string $name    The name/key of input item
      * @param mixed  $default The default value if the item doesn't exist
      */

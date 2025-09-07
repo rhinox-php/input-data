@@ -47,7 +47,9 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(null, (new InputData([]))->int(null, null));
         $this->assertSame(null, (new InputData((object) []))->int(null, null));
 
-        // @todo test big ints
+        // Test big integers
+        $this->assertSame(PHP_INT_MAX, (new InputData((string) PHP_INT_MAX))->int());
+        $this->assertSame(PHP_INT_MIN, (new InputData((string) PHP_INT_MIN))->int());
     }
 
     public function testDecimal(): void
@@ -68,7 +70,9 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(null, (new InputData([]))->decimal(null, null));
         $this->assertSame(2.3, (new InputData((object) []))->decimal(null, 2.3));
 
-        // @todo test high precision floats
+        // Test high precision floats
+        $this->assertSame(3.14159265359, (new InputData('3.14159265359'))->decimal());
+        $this->assertSame(1.7976931348623157E+308, (new InputData('1.7976931348623157E+308'))->decimal());
     }
 
     public function testBool(): void
@@ -109,7 +113,10 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(null, $inputData->dateTime('d2', 'Pacific/Auckland', null));
         $this->assertSame('2019-08-25', $inputData->dateTime('d3', null, '2019-08-25')->format('Y-m-d'));
         $this->assertSame('2019-08-25T00:00:00+1200', $inputData->dateTime('d3', 'Pacific/Auckland', '2019-08-25')->format(DATE_ISO8601));
-        // @todo test timestamps
+        // Test timestamps
+        $timestamp = '@' . time(); // Use @ prefix for timestamp format
+        $result = (new InputData(['timestamp' => $timestamp]))->dateTime('timestamp');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $result);
     }
 
     public function testArr(): void
@@ -124,11 +131,25 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         }
         $this->assertSame([], (new InputData('foo'))->arr()->getData());
         $this->assertSame(['a' => 1], (new InputData((object) ['a' => 1]))->arr()->getData());
-        // @todo test actual array values
-        // @todo test nested arrays
-        // @todo test object
-        // @todo test keys
-        // @todo test invalid data
+        // Test actual array values
+        $this->assertSame([1, 2, 3], $inputData->arr('a1')->getData());
+
+        // Test nested arrays
+        $nested = new InputData(['nested' => [['a' => 1], ['b' => 2]]]);
+        $this->assertSame([['a' => 1], ['b' => 2]], $nested->arr('nested')->getData());
+        $this->assertSame(1, $nested->arr('nested')->arr(0)->int('a'));
+
+        // Test object conversion to array
+        $objData = new InputData(['obj' => (object) ['key' => 'value']]);
+        $this->assertSame(['key' => 'value'], $objData->arr('obj')->getData());
+
+        // Test array keys
+        $keyed = new InputData(['items' => ['first' => 1, 'second' => 2]]);
+        $this->assertTrue($keyed->arr('items')->exists('first'));
+        $this->assertTrue($keyed->arr('items')->exists('second'));
+
+        // Test invalid data defaults
+        $this->assertSame(['default'], (new InputData(['invalid' => null]))->arr('invalid', ['default'])->getData());
     }
 
     public function testObject(): void
@@ -153,10 +174,23 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(InputData::class, $inputData->json('j1'));
         $this->assertNull(($inputData->json('j2')->string('abc', null)));
         $this->assertSame('123', ($inputData->json('j3', ['abc' => 123])->string('abc')));
-        // @todo test simple values
-        // @todo test object
-        // @todo test invalid data
-        // $this->markTestIncomplete();
+        // Test simple JSON values
+        $simpleJson = new InputData(['simple' => '"hello world"']);
+        $this->assertSame('hello world', $simpleJson->json('simple')->string());
+
+        $numberJson = new InputData(['number' => '42']);
+        $this->assertSame('42', $numberJson->json('number')->string());
+
+        // Test JSON object
+        $objectJson = new InputData(['obj' => '{"name":"John","age":30}']);
+        $result = $objectJson->json('obj');
+        $this->assertSame('John', $result->string('name'));
+        $this->assertSame(30, $result->int('age'));
+
+        // Test invalid JSON data
+        $invalidJson = new InputData(['bad' => 'not json at all']);
+        $this->assertSame([], $invalidJson->json('bad')->getData());
+        $this->assertSame(['fallback'], $invalidJson->json('bad', ['fallback'])->getData());
     }
 
     public function testRaw(): void
