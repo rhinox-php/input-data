@@ -42,9 +42,9 @@
         "analyze:psalm": "psalm --threads=4",
         "analyze:phpmd": "phpmd classes text unusedcode,naming,design,controversial,codesize",
         "qa": [
-            "@lint:dry",
+            "@lint:check",
             "@analyze",
-            "@test"
+            "@test:unit"
         ]
     }
 }
