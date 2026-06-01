@@ -14,8 +14,8 @@
     },
     "require-dev": {
         "vimeo/psalm": "^6.13",
-        "phpunit/phpunit": "^12.3",
-        "infection/infection": "^0.31",
+        "phpunit/phpunit": "^13.1",
+        "infection/infection": "^0.33",
         "friendsofphp/php-cs-fixer": "^3.87"
     },
     "config": {

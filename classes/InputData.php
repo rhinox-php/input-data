@@ -19,7 +19,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     /**
      * @param mixed[]|null|string|float|int $_data Input data
      */
-    public function __construct($_data = [])
+    public function __construct($_data = null)
     {
         if ($_data instanceof InputData) {
             $_data = $_data->_data;
