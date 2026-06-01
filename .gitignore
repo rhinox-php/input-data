@@ -1,6 +1,7 @@
-vendor
-.vscode
 .test-output
+.vscode
+*claude*
+/.history
 /.phpunit.result.cache
 /infection.log
-*claude*
+vendor
