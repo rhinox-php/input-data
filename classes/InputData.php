@@ -21,10 +21,51 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function __construct($_data = null)
     {
-        if ($_data instanceof InputData) {
+        if ($_data instanceof self) {
             $_data = $_data->_data;
         }
         $this->_data = $_data;
+    }
+
+    /**
+     * Creates an instance from data that may contain nested InputData instances,
+     * recursively replacing them with their raw data.
+     *
+     * @param mixed $data Input data, possibly containing InputData instances
+     */
+    public static function unwrap(mixed $data): static
+    {
+        return new static(static::unwrapData($data));
+    }
+
+    /**
+     * @param mixed $data The data to unwrap
+     *
+     * @return mixed The data with any nested InputData instances replaced by their raw data
+     */
+    protected static function unwrapData(mixed $data): mixed
+    {
+        if ($data instanceof self) {
+            $data = $data->_data;
+        }
+
+        return match (true) {
+            is_array($data) => array_map(
+                static fn ($value) => static::unwrapData($value),
+                $data
+            ),
+            $data instanceof \stdClass => static::unwrapObject($data),
+            default => $data,
+        };
+    }
+
+    protected static function unwrapObject(\stdClass $object): \stdClass
+    {
+        $result = clone $object;
+        foreach (get_object_vars($result) as $key => $value) {
+            $result->$key = static::unwrapData($value);
+        }
+        return $result;
     }
 
     /**
@@ -128,7 +169,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name    The name/key of input subarray
      * @param array  $default The default value if the item doesn't exist or is not an array
      */
-    public function arr(?string $name = null, ?array $default = []): InputData
+    public function arr(?string $name = null, ?array $default = []): static
     {
         if ($name === null) {
             $value = $this->_data;
@@ -152,7 +193,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name    The name/key of input item
      * @param mixed  $default The default value if the item doesn't exist
      */
-    public function object(?string $name = null, $default = null): InputData
+    public function object(?string $name = null, $default = null): static
     {
         if ($name === null) {
             $value = $this->_data;
@@ -175,7 +216,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name    The name/key of input item
      * @param array  $default The default value if the item doesn't exist
      */
-    public function json(?string $name = null, $default = []): InputData
+    public function json(?string $name = null, $default = []): static
     {
         $value = $this->string($name);
         if (!$value) {
@@ -298,7 +339,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return false;
     }
 
-    public function __get($name): InputData
+    public function __get($name): static
     {
         if (is_array($this->_data)) {
             return isset($this->_data[$name]) ? new static($this->_data[$name]) : new static(null);
@@ -417,7 +458,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         }
     }
 
-    public function find($callback): InputData
+    public function find($callback): static
     {
         foreach ($this as $key => $value) {
             if ($callback($value, $key)) {

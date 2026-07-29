@@ -230,4 +230,69 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData->set('foo', new InputData('baz'));
         $this->assertSame(['foo' => 'baz'], $inputData->getData());
     }
+
+    public function testNestedConstructor()
+    {
+        $inputData = MutableInputData::unwrap([
+            'foo' => [
+                'bar' => new InputData(['baz' => 123]),
+            ]
+        ]);
+        $this->assertSame(['foo' => ['bar' => ['baz' => 123]]], $inputData->getData());
+        $this->assertInstanceOf(MutableInputData::class, $inputData);
+    }
+
+    public function testUnwrapNestedInputData(): void
+    {
+        // The data held by an InputData can contain further InputData instances
+        $inputData = MutableInputData::unwrap(new InputData([
+            'foo' => new InputData([
+                'bar' => new InputData(['baz' => 123]),
+            ]),
+        ]));
+        $this->assertSame(['foo' => ['bar' => ['baz' => 123]]], $inputData->getData());
+    }
+
+    public function testUnwrapObject(): void
+    {
+        $inputData = MutableInputData::unwrap((object) [
+            'foo' => new InputData((object) ['bar' => new InputData(123)]),
+            'list' => [new InputData('a')],
+            'untouched' => (object) ['baz' => 456],
+        ]);
+        $this->assertEquals((object) [
+            'foo' => (object) ['bar' => 123],
+            'list' => ['a'],
+            'untouched' => (object) ['baz' => 456],
+        ], $inputData->getData());
+    }
+
+    public function testUnwrapDoesNotModifyTheInput(): void
+    {
+        $object = (object) ['foo' => (object) ['bar' => new InputData(123)]];
+        MutableInputData::unwrap($object);
+        $this->assertInstanceOf(InputData::class, $object->foo->bar);
+    }
+
+    public function testUnwrapScalar(): void
+    {
+        $this->assertSame('foo', MutableInputData::unwrap('foo')->getData());
+        $this->assertNull(MutableInputData::unwrap(null)->getData());
+        $this->assertSame('foo', MutableInputData::unwrap(new InputData('foo'))->getData());
+    }
+
+    public function testConstructorOnlyUnwrapsTopLevel(): void
+    {
+        // Deep unwrapping is opt in via unwrap() so construction stays cheap
+        $nested = new InputData('bar');
+        $inputData = new MutableInputData(['foo' => $nested]);
+        $this->assertSame(['foo' => $nested], $inputData->getData());
+    }
+
+    public function testNestedSetDeep()
+    {
+        $inputData = new MutableInputData(['foo' => 'bar']);
+        $inputData->set('foo', MutableInputData::unwrap(['bar' => new InputData(['baz' => 123])]));
+        $this->assertSame(['foo' => ['bar' => ['baz' => 123]]], $inputData->getData());
+    }
 }
