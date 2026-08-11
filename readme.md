@@ -552,6 +552,18 @@ $activeUser = $users->find(fn($user) => $user->bool('active'));
 echo $activeUser->string('name'); // "John"
 ```
 
+### Pipe Method
+Transform the whole data structure with a callback. The callback receives the InputData instance, and the value it returns becomes the new data (any nested InputData instances are unwrapped):
+
+```php
+$data = new InputData(['foo' => 1, 'bar' => 2]);
+
+$total = $data->pipe(fn($o) => ['baz' => $o->int('foo') + $o->int('bar')]);
+echo $total->int('baz'); // 3
+```
+
+On `InputData` and `ImmutableInputData` this returns a new instance and leaves the original untouched. On `MutableInputData` it replaces the data of the current instance.
+
 ## Extending InputData
 
 Create custom parsers by extending the base class:

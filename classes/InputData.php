@@ -458,6 +458,16 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         }
     }
 
+    /**
+     * Passes this instance to the callback and wraps the returned value in a new instance.
+     *
+     * @param callable $callback Receives this instance, returns the new data
+     */
+    public function pipe(callable $callback): static
+    {
+        return new static(static::unwrapData($callback($this)));
+    }
+
     public function find($callback): static
     {
         foreach ($this as $key => $value) {
