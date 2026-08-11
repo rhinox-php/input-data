@@ -22,6 +22,27 @@ class ImmutableInputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['a', 'b', 'c'], $inputData2->getData());
     }
 
+    public function testUnique(): void
+    {
+        $inputData = new ImmutableInputData(['a', 'b', 'a', 'c', 'b']);
+        $inputData2 = $inputData->unique();
+        $this->assertSame(['a', 'b', 'a', 'c', 'b'], $inputData->getData());
+        $this->assertSame([0 => 'a', 1 => 'b', 3 => 'c'], $inputData2->getData());
+    }
+
+    public function testSort(): void
+    {
+        $inputData = new ImmutableInputData(['item10', 'Item2', 'item1']);
+        $inputData2 = $inputData->sort();
+        $this->assertSame(['item10', 'Item2', 'item1'], $inputData->getData());
+        $this->assertSame([2 => 'item1', 1 => 'Item2', 0 => 'item10'], $inputData2->getData());
+
+        $inputData = new ImmutableInputData([3, 1, 2]);
+        $inputData2 = $inputData->sort(fn ($a, $b) => $b->int() <=> $a->int());
+        $this->assertSame([3, 1, 2], $inputData->getData());
+        $this->assertSame([0 => 3, 2 => 2, 1 => 1], $inputData2->getData());
+    }
+
     public function testMerge(): void
     {
         $inputData = new ImmutableInputData(['a', 'b', 'c']);

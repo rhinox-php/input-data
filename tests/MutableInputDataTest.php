@@ -71,6 +71,28 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['a', 'b', 'c'], $inputData->getData());
     }
 
+    public function testUnique(): void
+    {
+        $inputData = new MutableInputData(['a', 'b', 'a', 'c', 'b']);
+        $inputData->unique();
+        $this->assertSame([0 => 'a', 1 => 'b', 3 => 'c'], $inputData->getData());
+
+        $inputData = new MutableInputData('not an array');
+        $inputData->unique();
+        $this->assertSame([], $inputData->getData());
+    }
+
+    public function testSort(): void
+    {
+        $inputData = new MutableInputData(['item10', 'Item2', 'item1']);
+        $inputData->sort();
+        $this->assertSame([2 => 'item1', 1 => 'Item2', 0 => 'item10'], $inputData->getData());
+
+        $inputData = new MutableInputData(['x' => 3, 'y' => 1, 'z' => 2]);
+        $inputData->sort(fn ($a, $b) => $a->int() <=> $b->int());
+        $this->assertSame(['y' => 1, 'z' => 2, 'x' => 3], $inputData->getData());
+    }
+
     public function testMerge(): void
     {
         $inputData = new MutableInputData(['a', 'b', 'c']);

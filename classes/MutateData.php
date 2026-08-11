@@ -8,7 +8,7 @@ trait MutateData
 {
     abstract protected function mutateData($data);
 
-    public function extend(array ...$newData): self
+    public function extend(array ...$newData): static
     {
         $data = $this->_data;
         $result = [];
@@ -25,7 +25,7 @@ trait MutateData
     /**
      * Removes elements from data if the callback doesn't return a truthy value. If no callback is supplied it check if the value is truthy.
      */
-    public function filter(?callable $callback = null): self
+    public function filter(?callable $callback = null): static
     {
         if (!$callback) {
             $callback = fn ($value): bool => $value->_data != null;
@@ -39,7 +39,7 @@ trait MutateData
         return $this->mutateData($result);
     }
 
-    public function filterRecursive(?callable $callback = null): self
+    public function filterRecursive(?callable $callback = null): static
     {
         if (!$callback) {
             $callback = fn ($value): bool => $value->_data != null;
@@ -57,7 +57,7 @@ trait MutateData
         return $this->mutateData($result);
     }
 
-    public function map(callable $callback): self
+    public function map(callable $callback): static
     {
         $result = [];
         foreach ($this as $key => $value) {
@@ -66,7 +66,7 @@ trait MutateData
         return $this->mutateData($result);
     }
 
-    public function mapRecursive(callable $callback): self
+    public function mapRecursive(callable $callback): static
     {
         $result = [];
         foreach ($this as $key => $value) {
@@ -90,18 +90,43 @@ trait MutateData
         return $this->mutateData(static::unwrapData($callback($this)));
     }
 
-    public function merge($data): self
+    public function merge($data): static
     {
         $array = (new static($data))->arr()->getData();
         return $this->mutateData(array_merge($this->arr()->getData(), $array));
     }
 
-    public function values(): self
+    public function values(): static
     {
         return $this->mutateData(array_values($this->arr()->getData()));
     }
 
-    public function set(string $name, $value): InputData
+    /**
+     * Removes duplicate values from the data, preserving keys.
+     */
+    public function unique(): static
+    {
+        return $this->mutateData(array_unique($this->arr()->getData(), SORT_REGULAR));
+    }
+
+    /**
+     * Sorts the data by value, preserving keys. If no callback is supplied values are sorted
+     * using a case insensitive natural order comparison.
+     *
+     * @param callable $callback Optional comparator receiving two InputData values, returning an integer like usort
+     */
+    public function sort(?callable $callback = null): static
+    {
+        $data = $this->arr()->getData();
+        if ($callback) {
+            uasort($data, fn ($a, $b): int => $callback(new static($a), new static($b)));
+        } else {
+            natcasesort($data);
+        }
+        return $this->mutateData($data);
+    }
+
+    public function set(string $name, $value): static
     {
         if ($value instanceof InputData) {
             $value = $value->_data;
@@ -128,7 +153,7 @@ trait MutateData
         return $this->mutateData($data);
     }
 
-    public function unset($name): self
+    public function unset($name): static
     {
         $data = $this->_data;
         $d = &$data;

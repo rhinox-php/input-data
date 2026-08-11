@@ -495,6 +495,36 @@ $data1->merge(['c' => 3, 'd' => 4]);
 // Result: ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]
 ```
 
+#### unique()
+```php
+$data->unique(): static
+```
+
+Remove duplicate values, preserving keys.
+
+```php
+$data = new MutableInputData(['a', 'b', 'a', 'c', 'b']);
+$data->unique();
+// Result: [0 => 'a', 1 => 'b', 3 => 'c']
+```
+
+#### sort()
+```php
+$data->sort(?callable $callback = null): static
+```
+
+Sort data by value, preserving keys. The default sort uses a case insensitive natural order comparison (`natcasesort`). An optional comparator receives two InputData values and returns an integer like `usort`.
+
+```php
+$data = new MutableInputData(['item10', 'Item2', 'item1']);
+$data->sort();
+// Result: [2 => 'item1', 1 => 'Item2', 0 => 'item10']
+
+$data = new MutableInputData(['x' => 3, 'y' => 1, 'z' => 2]);
+$data->sort(fn($a, $b) => $a->int() <=> $b->int());
+// Result: ['y' => 1, 'z' => 2, 'x' => 3]
+```
+
 ## Advanced Features
 
 ### Dot Notation
