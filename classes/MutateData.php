@@ -102,6 +102,14 @@ trait MutateData
     }
 
     /**
+     * Replaces the data with its keys.
+     */
+    public function keys(): static
+    {
+        return $this->mutateData(array_keys($this->arr()->getData()));
+    }
+
+    /**
      * Removes duplicate values from the data, preserving keys.
      */
     public function unique(): static

@@ -71,6 +71,17 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['a', 'b', 'c'], $inputData->getData());
     }
 
+    public function testKeys(): void
+    {
+        $inputData = new MutableInputData(['a' => 1, 'b' => 2, 'c' => 3]);
+        $inputData->keys();
+        $this->assertSame(['a', 'b', 'c'], $inputData->getData());
+
+        $inputData = new MutableInputData('not an array');
+        $inputData->keys();
+        $this->assertSame([], $inputData->getData());
+    }
+
     public function testUnique(): void
     {
         $inputData = new MutableInputData(['a', 'b', 'a', 'c', 'b']);

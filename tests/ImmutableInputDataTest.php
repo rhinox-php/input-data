@@ -22,6 +22,14 @@ class ImmutableInputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['a', 'b', 'c'], $inputData2->getData());
     }
 
+    public function testKeys(): void
+    {
+        $inputData = new ImmutableInputData(['a' => 1, 'b' => 2, 'c' => 3]);
+        $inputData2 = $inputData->keys();
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $inputData->getData());
+        $this->assertSame(['a', 'b', 'c'], $inputData2->getData());
+    }
+
     public function testUnique(): void
     {
         $inputData = new ImmutableInputData(['a', 'b', 'a', 'c', 'b']);

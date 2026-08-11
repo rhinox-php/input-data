@@ -495,6 +495,19 @@ $data1->merge(['c' => 3, 'd' => 4]);
 // Result: ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]
 ```
 
+#### keys()
+```php
+$data->keys(): static
+```
+
+Replace the data with its keys.
+
+```php
+$data = new MutableInputData(['a' => 1, 'b' => 2, 'c' => 3]);
+$data->keys();
+// Result: ['a', 'b', 'c']
+```
+
 #### unique()
 ```php
 $data->unique(): static
