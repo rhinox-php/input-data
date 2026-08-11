@@ -295,4 +295,12 @@ class MutableInputDataTest extends \PHPUnit\Framework\TestCase
         $inputData->set('foo', MutableInputData::unwrap(['bar' => new InputData(['baz' => 123])]));
         $this->assertSame(['foo' => ['bar' => ['baz' => 123]]], $inputData->getData());
     }
+
+    public function testPipe(): void
+    {
+        $inputData = new MutableInputData(['foo' => 1, 'bar' => 2]);
+        $inputData2 = $inputData->pipe(fn ($o) => ['baz' => $o->int('foo') + $o->int('bar')]);
+        $this->assertSame(['baz' => 3], $inputData->getData());
+        $this->assertSame($inputData, $inputData2);
+    }
 }

@@ -79,6 +79,17 @@ trait MutateData
         return $this->mutateData($result);
     }
 
+    /**
+     * Passes this instance to the callback and uses the returned value as the new data.
+     *
+     * @param callable $callback Receives this instance, returns the new data
+     */
+    #[\Override]
+    public function pipe(callable $callback): static
+    {
+        return $this->mutateData(static::unwrapData($callback($this)));
+    }
+
     public function merge($data): self
     {
         $array = (new static($data))->arr()->getData();

@@ -167,4 +167,43 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
 
         unlink($tempFile);
     }
+
+    public function testPipe(): void
+    {
+        $inputData = new InputData(['foo' => 1, 'bar' => 2]);
+        $piped = $inputData->pipe(fn ($o) => ['baz' => $o->int('foo') + $o->int('bar')]);
+        $this->assertSame(['baz' => 3], $piped->getData());
+        $this->assertSame(['foo' => 1, 'bar' => 2], $inputData->getData());
+    }
+
+    public function testPipeArrayAccess(): void
+    {
+        $inputData = new InputData(['foo' => 1, 'bar' => 2]);
+        $piped = $inputData->pipe(fn ($o) => ['baz' => $o['foo']->int() + $o['bar']->int()]);
+        $this->assertSame(['baz' => 3], $piped->getData());
+    }
+
+    public function testPipeUnwrapsInputData(): void
+    {
+        $inputData = new InputData(['foo' => 1]);
+        $piped = $inputData->pipe(fn ($o) => ['bar' => $o]);
+        $this->assertSame(['bar' => ['foo' => 1]], $piped->getData());
+        $this->assertSame(['foo' => 1], $inputData->pipe(fn ($o) => $o)->getData());
+    }
+
+    public function testPipeChaining(): void
+    {
+        $inputData = new InputData(['foo' => 1, 'bar' => 2]);
+        $this->assertSame(6, $inputData
+            ->pipe(fn ($o) => ['baz' => $o->int('foo') + $o->int('bar')])
+            ->pipe(fn ($o) => ['baz' => $o->int('baz') * 2])
+            ->int('baz'));
+    }
+
+    public function testPipeNonArrayData(): void
+    {
+        $inputData = new InputData('foo');
+        $this->assertSame('FOO', $inputData->pipe(fn ($o) => strtoupper($o->string()))->string());
+        $this->assertNull((new InputData(null))->pipe(fn ($o) => $o->getData())->getData());
+    }
 }

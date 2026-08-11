@@ -109,4 +109,12 @@ class ImmutableInputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('bar', $inputData->raw('str.foo'));
         $this->assertNull($newInputData->raw('str.foo'));
     }
+
+    public function testPipe(): void
+    {
+        $inputData = new ImmutableInputData(['foo' => 1, 'bar' => 2]);
+        $inputData2 = $inputData->pipe(fn ($o) => ['baz' => $o->int('foo') + $o->int('bar')]);
+        $this->assertSame(['foo' => 1, 'bar' => 2], $inputData->getData());
+        $this->assertSame(['baz' => 3], $inputData2->getData());
+    }
 }
