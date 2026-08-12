@@ -119,6 +119,20 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(\DateTimeImmutable::class, $result);
     }
 
+    public function testDateTimeInterface(): void
+    {
+        $inputData = new InputData([
+            'immutable' => new \DateTimeImmutable('2019-07-24 10:30:00', new \DateTimezone('UTC')),
+            'mutable' => new \DateTime('2019-07-24 10:30:00', new \DateTimezone('UTC')),
+        ]);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $inputData->dateTime('immutable'));
+        $this->assertSame('2019-07-24T10:30:00+0000', $inputData->dateTime('immutable')->format(DATE_ISO8601));
+        $this->assertInstanceOf(\DateTimeImmutable::class, $inputData->dateTime('mutable'));
+        $this->assertSame('2019-07-24T10:30:00+0000', $inputData->dateTime('mutable')->format(DATE_ISO8601));
+        $this->assertSame('2019-07-24T22:30:00+1200', $inputData->dateTime('immutable', 'Pacific/Auckland')->format(DATE_ISO8601));
+        $this->assertSame('2019-07-24T22:30:00+1200', $inputData->dateTime('mutable', 'Pacific/Auckland')->format(DATE_ISO8601));
+    }
+
     public function testArr(): void
     {
         $inputData = new InputData([

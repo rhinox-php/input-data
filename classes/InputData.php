@@ -144,6 +144,14 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         [$data, $name] = $this->extractDataKey($name, $this->_data);
         $value = $this->getValue($data, $name, $default);
 
+        if ($value instanceof \DateTimeInterface) {
+            $result = \DateTimeImmutable::createFromInterface($value);
+            if ($timezone) {
+                $result = $result->setTimezone(new \DateTimezone($timezone));
+            }
+            return $result;
+        }
+
         if ($default === null && !$value) {
             return null;
         }
