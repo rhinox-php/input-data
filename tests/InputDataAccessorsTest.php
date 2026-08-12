@@ -209,4 +209,21 @@ class InputDataAccessorsTest extends \PHPUnit\Framework\TestCase
         $inputData = new InputData([1, 2, 3]);
         $this->assertSame(1, $inputData->raw(0));
     }
+
+    public function testRawWithoutName(): void
+    {
+        $inputData = new InputData('abc');
+        $this->assertSame('abc', $inputData->raw());
+
+        $inputData = new InputData(['a' => ['b' => 'c']]);
+        $this->assertSame(['a' => ['b' => 'c']], $inputData->raw());
+        $this->assertSame(['b' => 'c'], $inputData->arr('a')->raw());
+
+        $inputData = new InputData(null);
+        $this->assertNull($inputData->raw());
+
+        $object = (object) ['a' => 'b'];
+        $inputData = new InputData($object);
+        $this->assertEquals($object, $inputData->raw());
+    }
 }

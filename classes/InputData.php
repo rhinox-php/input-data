@@ -236,7 +236,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * @param string $name    The name/key of input item
      * @param mixed  $default The default value if the item doesn't exist
      */
-    public function raw(string $name, $default = null)
+    public function raw(?string $name = null, $default = null)
     {
         [$data, $name] = $this->extractDataKey($name, $this->_data);
 
