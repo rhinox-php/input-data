@@ -148,6 +148,26 @@ class InputDataTest extends \PHPUnit\Framework\TestCase
         $this->assertNull((new InputData(['a' => 1, 'b' => 2]))->find(fn ($value) => $value->int() === 999)->getData());
     }
 
+    public function testContains(): void
+    {
+        $this->assertTrue((new InputData(['a', 'b', 'c']))->contains('b'));
+        $this->assertFalse((new InputData(['a', 'b', 'c']))->contains('d'));
+        $this->assertTrue((new InputData(['a' => 1, 'b' => 2]))->contains(2));
+        $this->assertTrue((new InputData((object) ['a' => 1]))->contains(1));
+
+        // Loose comparison by default, strict when requested
+        $this->assertTrue((new InputData([1, 2, 3]))->contains('2'));
+        $this->assertFalse((new InputData([1, 2, 3]))->contains('2', true));
+        $this->assertTrue((new InputData([1, 2, 3]))->contains(2, true));
+
+        // InputData values are unwrapped before comparison
+        $this->assertTrue((new InputData(['a', 'b']))->contains(new InputData('b'), true));
+
+        // Non-iterable data never contains anything
+        $this->assertFalse((new InputData(null))->contains('a'));
+        $this->assertFalse((new InputData('abc'))->contains('a'));
+    }
+
     public function testJsonDecodeFileErrorHandling(): void
     {
         // Test file not found exception

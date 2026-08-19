@@ -476,6 +476,28 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
         return new static(static::unwrapData($callback($this)));
     }
 
+    /**
+     * Checks whether the input data contains the given value.
+     *
+     * @param mixed $value  The value to search for
+     * @param bool  $strict Use strict comparison
+     */
+    public function contains(mixed $value, bool $strict = false): bool
+    {
+        if ($value instanceof self) {
+            $value = $value->_data;
+        }
+        if (!is_array($this->_data) && !is_object($this->_data)) {
+            return false;
+        }
+        foreach ($this->_data as $item) {
+            if ($strict ? $item === $value : $item == $value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function find($callback): static
     {
         foreach ($this as $key => $value) {
